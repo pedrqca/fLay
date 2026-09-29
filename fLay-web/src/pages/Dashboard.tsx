@@ -50,23 +50,23 @@ export function Dashboard() {
     }))
 
     return (
-        <main className="min-h-screen flex-1 bg-[#FAF9F6] px-10 py-8">
+        <main className="min-h-screen flex-1 bg-[#FAF9F6] px-5 pb-8 pt-28 sm:px-6 md:px-10 md:py-8">
             <div className="mx-auto max-w-7xl">
-                <header className="mb-8">
-                    <p className="mb-2 text-base font-medium text-[#A3B18A]">
+                <header className="mb-7 md:mb-8">
+                    <p className="mb-2 text-sm font-medium text-[#A3B18A] md:text-base">
                         Visão geral
                     </p>
 
-                    <h1 className="text-4xl font-semibold tracking-tight text-[#2F4A33]">
+                    <h1 className="text-3xl font-semibold tracking-tight text-[#2F4A33] sm:text-4xl">
                         Olá, Layane 👋
                     </h1>
 
-                    <p className="mt-3 text-base text-[#588157]">
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-[#588157] md:text-base">
                         Acompanhe suas horas trabalhadas e seu banco de horas.
                     </p>
                 </header>
 
-                <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                <section className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3">
                     <StatCard
                         title="Horas trabalhadas"
                         value={formatMinutes(
