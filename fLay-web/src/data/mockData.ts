@@ -7,7 +7,7 @@ export const currentWeek: Weekday[] = [
         entry: '08:00',
         lunchExit: '12:00',
         lunchReturn: '13:00',
-        exit: '18:00',
+        exit: '20:00',
         expectedMinutes: 8 * 60,
     },
     {

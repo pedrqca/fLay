@@ -25,14 +25,8 @@ import {
 } from '../data/mockData'
 
 export function Dashboard() {
-
     const weekResult = calculateWeek(
         currentWeek,
-    )
-
-    console.log(
-        'Resultado da semana:',
-        weekResult,
     )
 
     const weeklyTransactions =
@@ -40,36 +34,20 @@ export function Dashboard() {
             weekResult,
         )
 
-    console.log(
-        'Transações geradas por dia:',
-        weeklyTransactions,
-    )
-
     const bankTransactions = [
         ...weeklyTransactions,
         compensationTransaction,
     ]
 
-    console.log(
-        'Transações do banco:',
-        bankTransactions,
-    )
-
     const bankResult = calculateBankBalance(
         bankTransactions,
     )
 
-    console.log(
-        'Resultado do banco:',
-        bankResult,
-    )
-
-    console.log(
-        'Saldo formatado:',
-        formatMinutes(
-            bankResult.balanceMinutes,
-        ),
-    )
+    const proofs = currentWeek.map((day) => ({
+        date: day.date,
+        entry: day.entry,
+        exit: day.exit,
+    }))
 
     return (
         <main className="min-h-screen flex-1 bg-[#FAF9F6] px-10 py-8">
@@ -115,7 +93,9 @@ export function Dashboard() {
                     />
                 </section>
 
-                <RecentProofs />
+                <RecentProofs
+                    proofs={proofs}
+                />
 
                 <BankHistory
                     transactions={bankTransactions}

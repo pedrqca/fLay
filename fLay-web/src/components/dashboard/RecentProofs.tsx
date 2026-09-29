@@ -1,24 +1,23 @@
-import { ArrowUpRight, FileImage, Upload } from 'lucide-react'
+import {
+    ArrowUpRight,
+    FileImage,
+    Plus,
+    Upload,
+} from 'lucide-react'
 
-const proofs = [
-    {
-        date: '28/09/2026',
-        entry: '08:02',
-        exit: '18:12',
-    },
-    {
-        date: '27/09/2026',
-        entry: '08:05',
-        exit: '18:01',
-    },
-    {
-        date: '26/09/2026',
-        entry: '08:01',
-        exit: '17:54',
-    },
-]
+interface Proof {
+    date: string
+    entry: string
+    exit: string
+}
 
-export function RecentProofs() {
+interface RecentProofsProps {
+    proofs: Proof[]
+}
+
+export function RecentProofs({
+    proofs,
+}: RecentProofsProps) {
     return (
         <section className="mt-8">
             <div className="mb-4 flex items-center justify-between">
@@ -32,12 +31,21 @@ export function RecentProofs() {
                     </p>
                 </div>
 
-                <button
-                    className="flex items-center gap-2 rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33]"
-                >
-                    <Upload size={17} />
-                    Enviar comprovante
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        className="flex items-center gap-2 rounded-xl border border-[#A3B18A]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD]"
+                    >
+                        <Plus size={17} />
+                        Registrar compensação
+                    </button>
+
+                    <button
+                        className="flex items-center gap-2 rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33]"
+                    >
+                        <Upload size={17} />
+                        Enviar comprovante
+                    </button>
+                </div>
             </div>
 
             <div className="overflow-hidden rounded-2xl border border-[#A3B18A]/30 bg-white">

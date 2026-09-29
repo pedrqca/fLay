@@ -35,6 +35,14 @@ export interface WeekResult {
 }
 
 function timeToMinutes(time: string): number {
+    const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/
+
+    if (!timePattern.test(time)) {
+        throw new Error(
+            `Horário inválido: "${time}". Use o formato HH:mm.`,
+        )
+    }
+
     const [hours, minutes] = time.split(':').map(Number)
 
     return hours * 60 + minutes
