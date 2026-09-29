@@ -6,6 +6,7 @@ import {
 
 import { StatCard } from '../components/dashboard/StatCard'
 import { RecentProofs } from '../components/dashboard/RecentProofs'
+import { BankHistory } from '../components/dashboard/BankHistory'
 
 import {
     calculateWeek,
@@ -90,7 +91,9 @@ export function Dashboard() {
                 <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                     <StatCard
                         title="Horas trabalhadas"
-                        value="36h 42min"
+                        value={formatMinutes(
+                            weekResult.totalWorkedMinutes,
+                        )}
                         description="Esta semana"
                         icon={Clock3}
                     />
@@ -106,13 +109,17 @@ export function Dashboard() {
 
                     <StatCard
                         title="Dias trabalhados"
-                        value="18 dias"
-                        description="Este mês"
+                        value={`${weekResult.days.length} dias`}
+                        description="Esta semana"
                         icon={CalendarDays}
                     />
                 </section>
 
                 <RecentProofs />
+
+                <BankHistory
+                    transactions={bankTransactions}
+                />
             </div>
         </main>
     )

@@ -5,6 +5,8 @@ import {
     Settings,
 } from 'lucide-react'
 
+import logo from '../../assets/logo/flay-logo.png'
+
 const menuItems = [
     {
         label: 'Visão geral',
@@ -26,12 +28,12 @@ const menuItems = [
 
 export function Sidebar() {
     return (
-        <aside className="flex h-screen w-64 flex-col border-r border-[#A3B18A]/30 bg-[#DAD7CD] px-5 py-6">
-            <div className="mb-10">
+        <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col border-r border-[#A3B18A]/30 bg-[#DAD7CD] px-5 py-6">
+            <div className="mb-10 flex justify-center">
                 <img
-                    src="/src/assets/logo/flay-logo.png"
+                    src={logo}
                     alt="fLay"
-                    className="h-10 w-auto"
+                    className="h-40 w-auto"
                 />
             </div>
 
