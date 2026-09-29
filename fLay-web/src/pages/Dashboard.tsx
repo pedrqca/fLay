@@ -3,10 +3,15 @@ import {
     Clock3,
     TrendingUp,
 } from 'lucide-react'
+import { useState } from 'react'
 
 import { StatCard } from '../components/dashboard/StatCard'
 import { RecentProofs } from '../components/dashboard/RecentProofs'
 import { BankHistory } from '../components/dashboard/BankHistory'
+
+import {
+    createCompensationTransaction,
+} from '../utils/bankTransactionFactory'
 
 import {
     calculateWeek,
@@ -15,16 +20,23 @@ import {
 import {
     calculateBankBalance,
     createBankTransactionsFromWeek,
+    type BankTransaction,
 } from '../utils/bankCalculator'
 
 import { formatMinutes } from '../utils/timeFormatter'
 
 import {
     currentWeek,
-    compensationTransaction,
 } from '../data/mockData'
 
+import type { CompensationData } from '../components/dashboard/CompensationModal'
+
 export function Dashboard() {
+    const [
+        compensationTransactions,
+        setCompensationTransactions,
+    ] = useState<BankTransaction[]>([])
+
     const weekResult = calculateWeek(
         currentWeek,
     )
@@ -36,7 +48,7 @@ export function Dashboard() {
 
     const bankTransactions = [
         ...weeklyTransactions,
-        compensationTransaction,
+        ...compensationTransactions,
     ]
 
     const bankResult = calculateBankBalance(
@@ -48,6 +60,20 @@ export function Dashboard() {
         entry: day.entry,
         exit: day.exit,
     }))
+
+    function handleCompensationSubmit(
+        data: CompensationData,
+    ) {
+        const transaction =
+            createCompensationTransaction(data)
+
+        setCompensationTransactions(
+            (currentTransactions) => [
+                ...currentTransactions,
+                transaction,
+            ],
+        )
+    }
 
     return (
         <main className="min-h-screen flex-1 bg-[#FAF9F6] px-5 pb-8 pt-28 sm:px-6 md:px-10 md:py-8">
@@ -95,10 +121,15 @@ export function Dashboard() {
 
                 <RecentProofs
                     proofs={proofs}
+                    onCompensationSubmit={
+                        handleCompensationSubmit
+                    }
                 />
 
                 <BankHistory
-                    transactions={bankTransactions}
+                    transactions={
+                        bankTransactions
+                    }
                 />
             </div>
         </main>

@@ -6,7 +6,10 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-import { CompensationModal } from './CompensationModal'
+import {
+    CompensationModal,
+    type CompensationData,
+} from './CompensationModal'
 
 interface Proof {
     date: string
@@ -16,13 +19,19 @@ interface Proof {
 
 interface RecentProofsProps {
     proofs: Proof[]
+    onCompensationSubmit: (
+        data: CompensationData,
+    ) => void
 }
 
 export function RecentProofs({
     proofs,
+    onCompensationSubmit,
 }: RecentProofsProps) {
-    const [isCompensationModalOpen, setIsCompensationModalOpen] =
-        useState(false)
+    const [
+        isCompensationModalOpen,
+        setIsCompensationModalOpen,
+    ] = useState(false)
 
     return (
         <>
@@ -87,24 +96,16 @@ export function RecentProofs({
                                     <p className="mt-1 truncate text-sm text-[#588157]">
                                         <span className="sm:hidden">
                                             Entrada{' '}
-                                            {
-                                                proof.entry
-                                            }{' '}
+                                            {proof.entry}{' '}
                                             · Saída{' '}
-                                            {
-                                                proof.exit
-                                            }
+                                            {proof.exit}
                                         </span>
 
                                         <span className="hidden sm:inline">
                                             Entrada{' '}
-                                            {
-                                                proof.entry
-                                            }{' '}
+                                            {proof.entry}{' '}
                                             · Saída{' '}
-                                            {
-                                                proof.exit
-                                            }
+                                            {proof.exit}
                                         </span>
                                     </p>
                                 </div>
@@ -133,6 +134,9 @@ export function RecentProofs({
                     setIsCompensationModalOpen(
                         false,
                     )
+                }
+                onSubmit={
+                    onCompensationSubmit
                 }
             />
         </>

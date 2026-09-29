@@ -4,14 +4,22 @@ import { useState } from 'react'
 import { DatePicker } from '../ui/DatePicker'
 import { TimePicker } from '../ui/TimePicker'
 
+export interface CompensationData {
+    date: string
+    hours: string
+    description: string
+}
+
 interface CompensationModalProps {
     isOpen: boolean
     onClose: () => void
+    onSubmit: (data: CompensationData) => void
 }
 
 export function CompensationModal({
     isOpen,
     onClose,
+    onSubmit,
 }: CompensationModalProps) {
     const [date, setDate] = useState('')
     const [hours, setHours] = useState('')
@@ -27,7 +35,7 @@ export function CompensationModal({
     ) {
         event.preventDefault()
 
-        console.log({
+        onSubmit({
             date,
             hours,
             description,
@@ -104,8 +112,7 @@ export function CompensationModal({
                             value={description}
                             onChange={(event) =>
                                 setDescription(
-                                    event.target
-                                        .value,
+                                    event.target.value,
                                 )
                             }
                             placeholder="Ex.: Folga de sábado"

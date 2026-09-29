@@ -221,8 +221,8 @@ export function DatePicker({
                     setIsOpen((open) => !open)
                 }
                 className={`flex w-full items-center justify-between rounded-xl border bg-[#FAF9F6] px-4 py-3 text-sm outline-none transition-colors ${isOpen
-                    ? 'border-[#588157]'
-                    : 'border-[#A3B18A]/40'
+                        ? 'border-[#588157]'
+                        : 'border-[#A3B18A]/40'
                     }`}
             >
                 <span
@@ -338,10 +338,10 @@ export function DatePicker({
                                             )
                                         }
                                         className={`flex h-9 items-center justify-center rounded-lg text-sm transition-colors ${isSelected
-                                            ? 'bg-[#588157] font-semibold text-white'
-                                            : isToday
-                                                ? 'bg-[#A3B18A]/20 font-semibold text-[#588157]'
-                                                : 'text-[#2F4A33] hover:bg-[#DAD7CD]'
+                                                ? 'bg-[#588157] font-semibold text-white'
+                                                : isToday
+                                                    ? 'bg-[#A3B18A]/20 font-semibold text-[#588157]'
+                                                    : 'text-[#2F4A33] hover:bg-[#DAD7CD]'
                                             }`}
                                     >
                                         {date.getDate()}
