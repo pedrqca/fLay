@@ -15,3 +15,30 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* Animação personalizada da Ampulheta */
+@keyframes flipHourglass {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  40% {
+    transform: rotate(180deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  90% {
+    transform: rotate(360deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-flip-hourglass {
+  animation: flipHourglass 2s ease-in-out infinite;
+}

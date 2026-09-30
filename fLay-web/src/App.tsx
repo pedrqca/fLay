@@ -5,7 +5,7 @@ import {
 } from 'react-router-dom'
 
 import { Sidebar } from './components/layout/Sidebar'
-import { LoadingScreen } from './components/LoadingScreen' // Verifique se o caminho está correto
+import { LoadingScreen } from './components/LoadingScreen'
 
 import { Dashboard } from './pages/Dashboard'
 import { Proofs } from './pages/Proofs'
@@ -13,23 +13,26 @@ import { Proofs } from './pages/Proofs'
 function App() {
   return (
     <BrowserRouter>
-      {/* TELA DE CARREGAMENTO */}
       <LoadingScreen />
 
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-[#FAF9F6]">
         <Sidebar />
 
-        <Routes>
-          <Route
-            path="/"
-            element={<Dashboard />}
-          />
+        <main className="flex-1 min-w-0 w-full overflow-x-hidden pt-20 md:pt-0">
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:py-8 lg:px-8">
+            <Routes>
+              <Route
+                path="/"
+                element={<Dashboard />}
+              />
 
-          <Route
-            path="/comprovantes"
-            element={<Proofs />}
-          />
-        </Routes>
+              <Route
+                path="/comprovantes"
+                element={<Proofs />}
+              />
+            </Routes>
+          </div>
+        </main>
       </div>
     </BrowserRouter>
   )
