@@ -3,8 +3,11 @@ import cors from '@fastify/cors'
 
 import { prisma } from './lib/prisma.js'
 import { userRoutes } from './routes/users.js'
+import { timeEntryRoutes } from './routes/timeEntries.js'
 
-const app = Fastify({ logger: true })
+const app = Fastify({
+    logger: true,
+})
 
 const frontendUrl =
     process.env.FRONTEND_URL ??
@@ -24,6 +27,7 @@ app.get('/', async () => {
 })
 
 await app.register(userRoutes)
+await app.register(timeEntryRoutes)
 
 const start = async () => {
     try {
@@ -34,7 +38,7 @@ const start = async () => {
             host: '0.0.0.0',
         })
 
-        console.log(`🚀 API running on port ${port}`)
+        console.log(`🚀 API running on port ${port} `)
     } catch (error) {
         app.log.error(error)
         process.exit(1)
