@@ -6,7 +6,12 @@ import {
     Settings,
     X,
 } from 'lucide-react'
+
 import { useState } from 'react'
+
+import {
+    NavLink,
+} from 'react-router-dom'
 
 import logo from '../../assets/logo/flay-logo.png'
 
@@ -14,24 +19,30 @@ const menuItems = [
     {
         label: 'Visão geral',
         icon: LayoutDashboard,
+        path: '/',
     },
     {
         label: 'Comprovantes',
         icon: FileImage,
+        path: '/comprovantes',
     },
     {
         label: 'Banco de horas',
         icon: Clock3,
+        path: '/banco',
     },
     {
         label: 'Configurações',
         icon: Settings,
+        path: '/configuracoes',
     },
 ]
 
 export function Sidebar() {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] =
-        useState(false)
+    const [
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
+    ] = useState(false)
 
     function closeMobileMenu() {
         setIsMobileMenuOpen(false)
@@ -54,14 +65,20 @@ export function Sidebar() {
                         const Icon = item.icon
 
                         return (
-                            <button
+                            <NavLink
                                 key={item.label}
-                                type="button"
-                                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#588157] transition-colors hover:bg-[#A3B18A]/30"
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive
+                                        ? 'bg-[#A3B18A]/40 text-[#2F4A33]'
+                                        : 'text-[#588157] hover:bg-[#A3B18A]/30'
+                                    }`
+                                }
                             >
                                 <Icon size={19} />
+
                                 {item.label}
-                            </button>
+                            </NavLink>
                         )
                     })}
                 </nav>
@@ -102,8 +119,8 @@ export function Sidebar() {
             {/* MENU MOBILE */}
             <aside
                 className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-[#DAD7CD] px-5 py-6 shadow-xl transition-transform duration-300 md:hidden ${isMobileMenuOpen
-                        ? 'translate-x-0'
-                        : '-translate-x-full'
+                    ? 'translate-x-0'
+                    : '-translate-x-full'
                     }`}
             >
                 <div className="mb-8 flex items-center justify-between">
@@ -115,7 +132,9 @@ export function Sidebar() {
 
                     <button
                         type="button"
-                        onClick={closeMobileMenu}
+                        onClick={
+                            closeMobileMenu
+                        }
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-[#588157] transition-colors hover:bg-[#A3B18A]/30"
                         aria-label="Fechar menu"
                     >
@@ -128,17 +147,23 @@ export function Sidebar() {
                         const Icon = item.icon
 
                         return (
-                            <button
+                            <NavLink
                                 key={item.label}
-                                type="button"
+                                to={item.path}
                                 onClick={
                                     closeMobileMenu
                                 }
-                                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#588157] transition-colors hover:bg-[#A3B18A]/30"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive
+                                        ? 'bg-[#A3B18A]/40 text-[#2F4A33]'
+                                        : 'text-[#588157] hover:bg-[#A3B18A]/30'
+                                    }`
+                                }
                             >
                                 <Icon size={19} />
+
                                 {item.label}
-                            </button>
+                            </NavLink>
                         )
                     })}
                 </nav>

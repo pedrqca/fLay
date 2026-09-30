@@ -1,9 +1,7 @@
 import {
     CalendarDays,
     Clock3,
-    Trash2,
     TrendingUp,
-    X,
 } from 'lucide-react'
 
 import {
@@ -12,10 +10,9 @@ import {
 } from 'react'
 
 import { StatCard } from '../components/dashboard/StatCard'
-
 import { RecentProofs } from '../components/dashboard/RecentProofs'
-
 import { BankHistory } from '../components/dashboard/BankHistory'
+import { CardWarning } from '../components/ui/CardWarning'
 
 import {
     calculateWeek,
@@ -35,7 +32,6 @@ import {
 
 import {
     createWorkday,
-    deleteWorkday,
     getWorkdays,
     updateWorkday,
     type Workday,
@@ -44,8 +40,8 @@ import {
 import {
     createBankTransaction,
     deleteBankTransaction,
-    updateBankTransaction,
     getBankTransactions,
+    updateBankTransaction,
 } from '../api/bankTransactions'
 
 import type {
@@ -135,7 +131,9 @@ export function Dashboard() {
     const [
         bankTransactionsFromApi,
         setBankTransactionsFromApi,
-    ] = useState<ApiBankTransaction[]>([])
+    ] = useState<
+        ApiBankTransaction[]
+    >([])
 
     const [
         workdays,
@@ -145,9 +143,9 @@ export function Dashboard() {
     const [
         editingCompensation,
         setEditingCompensation,
-    ] = useState<CompensationToEdit | null>(
-        null,
-    )
+    ] = useState<
+        CompensationToEdit | null
+    >(null)
 
     const [
         isCompensationModalOpen,
@@ -157,9 +155,9 @@ export function Dashboard() {
     const [
         compensationToDelete,
         setCompensationToDelete,
-    ] = useState<ApiBankTransaction | null>(
-        null,
-    )
+    ] = useState<
+        ApiBankTransaction | null
+    >(null)
 
     const [
         isDeletingCompensation,
@@ -267,8 +265,7 @@ export function Dashboard() {
             ).toLocaleDateString(
                 'pt-BR',
                 {
-                    timeZone:
-                        'UTC',
+                    timeZone: 'UTC',
                 },
             ),
 
@@ -302,7 +299,9 @@ export function Dashboard() {
             const totalMinutes =
                 hours * 60 + minutes
 
-            if (editingCompensation) {
+            if (
+                editingCompensation
+            ) {
                 await updateBankTransaction(
                     editingCompensation.id,
                     {
@@ -429,7 +428,9 @@ export function Dashboard() {
     }
 
     function handleCloseDeleteCompensation() {
-        if (isDeletingCompensation) {
+        if (
+            isDeletingCompensation
+        ) {
             return
         }
 
@@ -439,7 +440,9 @@ export function Dashboard() {
     }
 
     async function handleConfirmDeleteCompensation() {
-        if (!compensationToDelete) {
+        if (
+            !compensationToDelete
+        ) {
             return
         }
 
@@ -523,25 +526,6 @@ export function Dashboard() {
                     : 'Erro ao registrar jornada:',
                 error,
             )
-        }
-    }
-
-    async function handleDeleteWorkday(
-        workdayId: number,
-    ) {
-        try {
-            await deleteWorkday(
-                workdayId,
-            )
-
-            await loadDashboardData()
-        } catch (error) {
-            console.error(
-                'Erro ao excluir jornada:',
-                error,
-            )
-
-            throw error
         }
     }
 
@@ -629,9 +613,6 @@ export function Dashboard() {
                     onProofSubmit={
                         handleProofSubmit
                     }
-                    onDelete={
-                        handleDeleteWorkday
-                    }
                 />
 
                 <BankHistory
@@ -647,122 +628,45 @@ export function Dashboard() {
                 />
             </div>
 
-            {compensationToDelete && (
-                <div
-                    className="fixed inset-0 z-[80] flex items-center justify-center bg-[#2F4A33]/30 px-4 py-6 backdrop-blur-sm"
-                    onMouseDown={(
-                        event,
-                    ) => {
-                        if (
-                            event.target ===
-                            event.currentTarget
-                        ) {
-                            handleCloseDeleteCompensation()
-                        }
-                    }}
-                >
-                    <div className="w-full max-w-md overflow-hidden rounded-2xl bg-[#FAF9F6] shadow-2xl">
-                        <div className="px-5 pb-5 pt-6 sm:px-6 sm:pt-7">
-                            <div className="flex items-start gap-4">
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500">
-                                    <Trash2
-                                        size={21}
-                                    />
-                                </div>
+            <CardWarning
+                isOpen={
+                    compensationToDelete !==
+                    null
+                }
+                title="Excluir compensação?"
+                description="Deseja realmente excluir esta compensação?"
+                itemTitle={
+                    compensationToDelete?.description
+                }
+                itemDetails={
+                    compensationToDelete
+                        ? [
+                            normalizeDate(
+                                compensationToDelete.date,
+                            )
+                                .split('-')
+                                .reverse()
+                                .join('/'),
 
-                                <div className="min-w-0 flex-1">
-                                    <h3 className="text-lg font-semibold text-[#2F4A33]">
-                                        Excluir compensação?
-                                    </h3>
-
-                                    <p className="mt-1.5 text-sm leading-5 text-[#588157]">
-                                        Deseja realmente excluir esta compensação?
-                                    </p>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        handleCloseDeleteCompensation
-                                    }
-                                    disabled={
-                                        isDeletingCompensation
-                                    }
-                                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Fechar"
-                                >
-                                    <X size={18} />
-                                </button>
-                            </div>
-
-                            <div className="mt-5 rounded-xl border border-[#D8CFBF] bg-[#F1EDE4] px-4 py-3.5">
-                                <p className="truncate text-sm font-semibold text-[#5C5040]">
-                                    {
-                                        compensationToDelete.description
-                                    }
-                                </p>
-
-                                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-[#7A6F5D]">
-                                    <span>
-                                        {normalizeDate(
-                                            compensationToDelete.date,
-                                        )
-                                            .split('-')
-                                            .reverse()
-                                            .join('/')}
-                                    </span>
-
-                                    <span>
-                                        {formatMinutes(
-                                            compensationToDelete.minutes,
-                                        )}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="mt-4 rounded-xl border border-red-100 bg-red-50/70 px-4 py-3.5">
-                                <p className="text-sm leading-5 text-red-700">
-                                    Essa ação removerá a compensação do banco de horas. Essa operação não pode ser desfeita.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col-reverse gap-2 border-t border-[#A3B18A]/20 bg-white/60 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
-                            <button
-                                type="button"
-                                onClick={
-                                    handleCloseDeleteCompensation
-                                }
-                                disabled={
-                                    isDeletingCompensation
-                                }
-                                className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                            >
-                                Cancelar
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={
-                                    handleConfirmDeleteCompensation
-                                }
-                                disabled={
-                                    isDeletingCompensation
-                                }
-                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                            >
-                                <Trash2
-                                    size={16}
-                                />
-
-                                {isDeletingCompensation
-                                    ? 'Excluindo...'
-                                    : 'Excluir compensação'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                            formatMinutes(
+                                compensationToDelete.minutes,
+                            ),
+                        ]
+                        : []
+                }
+                warning="Essa ação removerá a compensação do banco de horas. Essa operação não pode ser desfeita."
+                confirmLabel="Excluir compensação"
+                loadingLabel="Excluindo..."
+                isLoading={
+                    isDeletingCompensation
+                }
+                onClose={
+                    handleCloseDeleteCompensation
+                }
+                onConfirm={
+                    handleConfirmDeleteCompensation
+                }
+            />
         </main>
     )
 }

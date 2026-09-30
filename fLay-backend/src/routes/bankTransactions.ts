@@ -15,16 +15,14 @@ export async function bankTransactionRoutes(
                 }
 
             const transactions =
-                await prisma.bankTransaction.findMany(
-                    {
-                        where: {
-                            userId: Number(userId),
-                        },
-                        orderBy: {
-                            date: 'asc',
-                        },
+                await prisma.bankTransaction.findMany({
+                    where: {
+                        userId: Number(userId),
                     },
-                )
+                    orderBy: {
+                        date: 'asc',
+                    },
+                })
 
             return transactions
         },
@@ -48,23 +46,35 @@ export async function bankTransactionRoutes(
                     description: string
                 }
 
+            if (
+                !body.userId ||
+                !body.date ||
+                !body.type ||
+                typeof body.minutes !== 'number' ||
+                body.minutes <= 0 ||
+                !body.description?.trim()
+            ) {
+                return reply
+                    .status(400)
+                    .send({
+                        message:
+                            'Dados inválidos para criar a transação.',
+                    })
+            }
+
             const transaction =
-                await prisma.bankTransaction.create(
-                    {
-                        data: {
-                            userId:
-                                body.userId,
-                            date: new Date(
-                                body.date,
-                            ),
-                            type: body.type,
-                            minutes:
-                                body.minutes,
-                            description:
-                                body.description,
-                        },
+                await prisma.bankTransaction.create({
+                    data: {
+                        userId: body.userId,
+                        date: new Date(
+                            body.date,
+                        ),
+                        type: body.type,
+                        minutes: body.minutes,
+                        description:
+                            body.description.trim(),
                     },
-                )
+                })
 
             return reply
                 .status(201)
@@ -94,24 +104,36 @@ export async function bankTransactionRoutes(
                     description: string
                 }
 
+            if (
+                !body.date ||
+                !body.type ||
+                typeof body.minutes !== 'number' ||
+                body.minutes <= 0 ||
+                !body.description?.trim()
+            ) {
+                return reply
+                    .status(400)
+                    .send({
+                        message:
+                            'Dados inválidos para atualizar a transação.',
+                    })
+            }
+
             const transaction =
-                await prisma.bankTransaction.update(
-                    {
-                        where: {
-                            id: Number(id),
-                        },
-                        data: {
-                            date: new Date(
-                                body.date,
-                            ),
-                            type: body.type,
-                            minutes:
-                                body.minutes,
-                            description:
-                                body.description,
-                        },
+                await prisma.bankTransaction.update({
+                    where: {
+                        id: Number(id),
                     },
-                )
+                    data: {
+                        date: new Date(
+                            body.date,
+                        ),
+                        type: body.type,
+                        minutes: body.minutes,
+                        description:
+                            body.description.trim(),
+                    },
+                })
 
             return reply.send(
                 transaction,
@@ -131,13 +153,11 @@ export async function bankTransactionRoutes(
                     id: string
                 }
 
-            await prisma.bankTransaction.delete(
-                {
-                    where: {
-                        id: Number(id),
-                    },
+            await prisma.bankTransaction.delete({
+                where: {
+                    id: Number(id),
                 },
-            )
+            })
 
             return reply
                 .status(204)
