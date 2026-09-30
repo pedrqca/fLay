@@ -21,7 +21,6 @@ export interface ProofData {
 interface ProofModalProps {
     isOpen: boolean
     onClose: () => void
-    // 1. ATUALIZADO: Agora aceita uma função assíncrona
     onSubmit: (
         data: ProofData,
     ) => void | Promise<void>
@@ -43,7 +42,6 @@ function normalizeDate(
     const cleanedDate =
         date.trim().replace(/\s+/g, '')
 
-    // Já está no formato yyyy-mm-dd
     if (
         /^\d{4}-\d{2}-\d{2}$/.test(
             cleanedDate,
@@ -52,7 +50,6 @@ function normalizeDate(
         return cleanedDate
     }
 
-    // Caso venha como yyyy/mm/dd
     if (
         /^\d{4}\/\d{2}\/\d{2}$/.test(
             cleanedDate,
@@ -64,7 +61,6 @@ function normalizeDate(
         )
     }
 
-    // Caso venha como dd/mm/yyyy
     if (
         /^\d{2}\/\d{2}\/\d{4}$/.test(
             cleanedDate,
@@ -79,7 +75,6 @@ function normalizeDate(
         return `${year}-${month}-${day}`
     }
 
-    // Caso venha como dd-mm-yyyy
     if (
         /^\d{2}-\d{2}-\d{4}$/.test(
             cleanedDate,
@@ -115,7 +110,6 @@ export function ProofModal({
         setError,
     ] = useState('')
 
-    // 2. NOVO ESTADO: Controla o carregamento
     const [
         isSubmitting,
         setIsSubmitting,
@@ -143,7 +137,7 @@ export function ProofModal({
         }
 
         setError('')
-        setIsSubmitting(false) // Reseta o loading ao abrir
+        setIsSubmitting(false)
     }, [
         isOpen,
         initialData,
@@ -217,7 +211,6 @@ export function ProofModal({
         setError('')
     }
 
-    // 3. ATUALIZADO: Função agora é async e usa o isSubmitting
     async function handleSubmit(
         event: React.FormEvent<HTMLFormElement>,
     ) {
@@ -264,15 +257,15 @@ export function ProofModal({
         }
 
         setError('')
-        setIsSubmitting(true) // Ativa o loading
+        setIsSubmitting(true)
 
         try {
-            await onSubmit(data) // Espera a resposta do banco
+            await onSubmit(data)
         } catch (err) {
             console.error('Erro ao salvar jornada:', err)
             setError('Ocorreu um erro ao salvar. Tente novamente.')
         } finally {
-            setIsSubmitting(false) // Remove o loading
+            setIsSubmitting(false)
         }
     }
 
@@ -296,248 +289,197 @@ export function ProofModal({
         Boolean(initialData)
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#2F4A33]/30 px-4 py-6 backdrop-blur-sm sm:px-6"
-            onMouseDown={(event) => {
-                // Impede fechar clicando fora se estiver carregando
-                if (isSubmitting) return
+        <>
+            {/* BACKDROP: Fundo desfocado fixo */}
+            <div className="fixed inset-0 z-50 bg-[#2F4A33]/30 backdrop-blur-sm transition-opacity" />
 
-                if (
-                    event.target ===
-                    event.currentTarget
-                ) {
-                    onClose()
-                }
-            }}
-        >
-            <div className="my-auto w-full max-w-lg overflow-visible rounded-2xl bg-[#FAF9F6] shadow-xl">
-                {/* HEADER */}
-                <div className="flex items-start justify-between gap-4 border-b border-[#A3B18A]/30 px-5 py-4 sm:px-6">
-                    <div className="min-w-0">
-                        <h2 className="text-lg font-semibold text-[#2F4A33] sm:text-xl">
-                            {isEditing
-                                ? 'Editar jornada'
-                                : 'Registrar jornada'}
-                        </h2>
-
-                        <p className="mt-1 text-sm leading-5 text-[#588157]">
-                            {isEditing
-                                ? 'Atualize os registros do seu dia.'
-                                : 'Informe os registros do seu dia.'}
-                        </p>
-                    </div>
-
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        disabled={isSubmitting} // Desabilita o X no loading
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label="Fechar"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
-
-                {/* FORM */}
-                <form
-                    onSubmit={handleSubmit}
-                    className="space-y-5 px-5 py-5 sm:px-6 sm:py-6"
+            {/* CONTAINER SCROLL: Permite rolagem se o modal ficar muito alto */}
+            <div
+                className="fixed inset-0 z-50 overflow-y-auto"
+                onMouseDown={(event) => {
+                    if (isSubmitting) return
+                    if (event.target === event.currentTarget) onClose()
+                }}
+            >
+                {/* ALINHAMENTO RESPONSIVO: items-end no mobile (fica na base), items-center no PC */}
+                <div
+                    className="flex min-h-full items-end justify-center p-4 sm:items-center sm:p-0"
+                    onMouseDown={(event) => {
+                        if (isSubmitting) return
+                        if (event.target === event.currentTarget) onClose()
+                    }}
                 >
-                    {/* DATA */}
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-[#2F4A33]">
-                            Data
-                        </label>
+                    <div className="relative w-full max-w-lg transform overflow-visible rounded-2xl bg-[#FAF9F6] text-left shadow-xl transition-all sm:my-8">
 
-                        <DatePicker
-                            value={
-                                form.date
-                            }
-                            onChange={
-                                handleDateChange
-                            }
-                        />
-                    </div>
+                        {/* HEADER */}
+                        <div className="flex items-start justify-between gap-4 border-b border-[#A3B18A]/30 px-4 py-4 sm:px-6 sm:py-5">
+                            <div className="min-w-0">
+                                <h2 className="text-lg font-semibold text-[#2F4A33] sm:text-xl">
+                                    {isEditing
+                                        ? 'Editar jornada'
+                                        : 'Registrar jornada'}
+                                </h2>
 
-                    {/* HORÁRIOS */}
-                    <div>
-                        <div className="mb-3 flex items-end justify-between gap-3">
-                            <div>
-                                <label className="block text-sm font-medium text-[#2F4A33]">
-                                    Horários
-                                </label>
-
-                                <p className="mt-1 text-xs leading-5 text-[#588157]">
-                                    Adicione os registros de entrada e saída.
+                                <p className="mt-1 text-xs leading-relaxed text-[#588157] sm:text-sm">
+                                    {isEditing
+                                        ? 'Atualize os registros do seu dia.'
+                                        : 'Informe os registros do seu dia.'}
                                 </p>
                             </div>
 
-                            <span className="shrink-0 rounded-full bg-[#A3B18A]/15 px-3 py-1 text-xs font-medium text-[#588157]">
-                                {
-                                    form
-                                        .times
-                                        .length
-                                }{' '}
-                                horários
-                            </span>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                disabled={isSubmitting}
+                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label="Fechar"
+                            >
+                                <X size={20} />
+                            </button>
                         </div>
 
-                        <div className="space-y-4">
-                            {form.times.map(
-                                (
-                                    time,
-                                    index,
-                                ) => (
-                                    <div
-                                        key={
-                                            index
-                                        }
-                                        className="flex items-end gap-2"
-                                    >
-                                        <div className="min-w-0 flex-1">
-                                            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[#2F4A33]">
-                                                <Clock3
-                                                    size={
-                                                        16
-                                                    }
-                                                />
+                        {/* FORM */}
+                        <form
+                            onSubmit={handleSubmit}
+                            className="space-y-5 px-4 py-5 sm:px-6 sm:py-6"
+                        >
+                            {/* DATA */}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-[#2F4A33]">
+                                    Data
+                                </label>
 
-                                                {
-                                                    getTimeLabel(
-                                                        index,
-                                                    )
-                                                }
-                                            </label>
+                                <DatePicker
+                                    value={form.date}
+                                    onChange={handleDateChange}
+                                />
+                            </div>
 
-                                            <TimePicker
-                                                value={
-                                                    time
-                                                }
-                                                onChange={(
-                                                    value,
-                                                ) =>
-                                                    handleTimeChange(
-                                                        index,
-                                                        value,
-                                                    )
-                                                }
-                                                placeholder="Selecione o horário"
-                                            />
-                                        </div>
+                            {/* HORÁRIOS */}
+                            <div>
+                                <div className="mb-3 flex items-end justify-between gap-2">
+                                    <div className="min-w-0">
+                                        <label className="block text-sm font-medium text-[#2F4A33]">
+                                            Horários
+                                        </label>
 
-                                        {form
-                                            .times
-                                            .length >
-                                            2 && (
-                                                <button
-                                                    type="button"
-                                                    disabled={isSubmitting} // Desabilita no loading
-                                                    onClick={() =>
-                                                        handleRemoveTime(
-                                                            index,
-                                                        )
-                                                    }
-                                                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#A3B18A]/40 text-[#A3B18A] transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-[#A3B18A]/40 disabled:hover:text-[#A3B18A]"
-                                                    aria-label={`Remover ${getTimeLabel(index).toLowerCase()}`}
-                                                >
-                                                    <Trash2
-                                                        size={
-                                                            18
-                                                        }
-                                                    />
-                                                </button>
-                                            )}
+                                        <p className="mt-0.5 text-xs leading-relaxed text-[#588157]">
+                                            Adicione os registros de entrada e saída.
+                                        </p>
                                     </div>
-                                ),
+
+                                    <span className="shrink-0 rounded-full bg-[#A3B18A]/15 px-2.5 py-1 text-xs font-medium text-[#588157]">
+                                        {form.times.length} horários
+                                    </span>
+                                </div>
+
+                                <div className="space-y-3 sm:space-y-4">
+                                    {form.times.map(
+                                        (time, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-end gap-2 sm:gap-3"
+                                            >
+                                                <div className="min-w-0 flex-1">
+                                                    <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-[#2F4A33]">
+                                                        <Clock3 size={16} />
+                                                        {getTimeLabel(index)}
+                                                    </label>
+
+                                                    <TimePicker
+                                                        value={time}
+                                                        onChange={(value) =>
+                                                            handleTimeChange(index, value)
+                                                        }
+                                                        placeholder="Selecione o horário"
+                                                    />
+                                                </div>
+
+                                                {form.times.length > 2 && (
+                                                    <button
+                                                        type="button"
+                                                        disabled={isSubmitting}
+                                                        onClick={() => handleRemoveTime(index)}
+                                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#A3B18A]/40 text-[#A3B18A] transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[#A3B18A]/40 disabled:hover:bg-transparent disabled:hover:text-[#A3B18A] sm:h-12 sm:w-12"
+                                                        aria-label={`Remover ${getTimeLabel(index).toLowerCase()}`}
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+
+                                {/* ADICIONAR HORÁRIO */}
+                                <button
+                                    type="button"
+                                    disabled={isSubmitting}
+                                    onClick={handleAddTime}
+                                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#A3B18A]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:border-[#588157] hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50 sm:py-3"
+                                >
+                                    <Plus size={18} />
+                                    Adicionar horário
+                                </button>
+
+                                {/* EXPLICAÇÃO */}
+                                <div className="mt-4 rounded-xl bg-[#A3B18A]/10 px-3 py-3 sm:px-4">
+                                    <p className="text-xs leading-relaxed text-[#588157]">
+                                        Os horários são considerados em pares: <strong>entrada → saída</strong>.
+                                    </p>
+
+                                    <p className="mt-1 text-xs leading-relaxed text-[#A3B18A]">
+                                        Exemplo: 08:00 → 12:00 → 13:30 → 18:00.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* ERRO */}
+                            {error && (
+                                <div
+                                    className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 sm:px-4 sm:py-3"
+                                    role="alert"
+                                >
+                                    <p className="text-sm leading-relaxed text-red-600">
+                                        {error}
+                                    </p>
+                                </div>
                             )}
-                        </div>
 
-                        {/* ADICIONAR HORÁRIO */}
-                        <button
-                            type="button"
-                            disabled={isSubmitting} // Desabilita no loading
-                            onClick={
-                                handleAddTime
-                            }
-                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#A3B18A]/50 bg-white px-4 py-3 text-sm font-medium text-[#588157] transition-colors hover:border-[#588157] hover:bg-[#DAD7CD] disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <Plus size={18} />
+                            {/* ACTIONS */}
+                            <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    disabled={isSubmitting}
+                                    className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                                >
+                                    Cancelar
+                                </button>
 
-                            Adicionar horário
-                        </button>
-
-                        {/* EXPLICAÇÃO */}
-                        <div className="mt-4 rounded-xl bg-[#A3B18A]/10 px-4 py-3">
-                            <p className="text-xs leading-5 text-[#588157]">
-                                Os horários são
-                                considerados em pares:
-                                <strong>
-                                    {' '}
-                                    entrada → saída
-                                </strong>
-                                .
-                            </p>
-
-                            <p className="mt-1 text-xs leading-5 text-[#A3B18A]">
-                                Exemplo: 08:00 →
-                                12:00 → 13:30 →
-                                18:00.
-                            </p>
-                        </div>
+                                <button
+                                    type="submit"
+                                    disabled={
+                                        isSubmitting ||
+                                        !form.date ||
+                                        form.times.some((time) => !time) ||
+                                        form.times.length % 2 !== 0
+                                    }
+                                    className="w-full rounded-xl bg-[#588157] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                                >
+                                    {isSubmitting
+                                        ? isEditing
+                                            ? 'Salvando...'
+                                            : 'Registrando...'
+                                        : isEditing
+                                            ? 'Salvar alterações'
+                                            : 'Registrar jornada'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    {/* ERRO */}
-                    {error && (
-                        <div
-                            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3"
-                            role="alert"
-                        >
-                            <p className="text-sm leading-5 text-red-600">
-                                {error}
-                            </p>
-                        </div>
-                    )}
-
-                    {/* ACTIONS */}
-                    <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
-                        <button
-                            type="button"
-                            onClick={
-                                onClose
-                            }
-                            disabled={isSubmitting} // Desabilita no loading
-                            className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
-                        >
-                            Cancelar
-                        </button>
-
-                        <button
-                            type="submit"
-                            disabled={
-                                isSubmitting || // 4. Adicionado validação de loading
-                                !form.date ||
-                                form.times.some(
-                                    (
-                                        time,
-                                    ) =>
-                                        !time,
-                                ) ||
-                                form.times
-                                    .length %
-                                2 !==
-                                0
-                            }
-                            className="w-full rounded-xl bg-[#588157] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                        >
-                            {/* 5. Muda o texto de acordo com o status e edição */}
-                            {isSubmitting
-                                ? (isEditing ? 'Salvando...' : 'Registrando...')
-                                : (isEditing ? 'Salvar alterações' : 'Registrar jornada')
-                            }
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
-        </div>
+        </>
     )
 }

@@ -16,7 +16,7 @@ import {
     type CompensationToEdit,
 } from './CompensationModal'
 
-import { CardWarning } from '../ui/CardWarning' // Caminho corrigido para a pasta ui
+import { CardWarning } from '../ui/CardWarning'
 
 import {
     ProofModal,
@@ -44,7 +44,6 @@ interface RecentProofsProps {
 
     editingCompensation?: CompensationToEdit | null
 
-    // ATUALIZADO: Agora aceita função assíncrona (Promise)
     onProofSubmit?: (
         data: ProofData,
         workdayId?: number,
@@ -119,7 +118,6 @@ export function RecentProofs({
         setProofToEdit(null)
     }
 
-
     async function handleProofSubmit(
         data: ProofData,
     ) {
@@ -138,7 +136,6 @@ export function RecentProofs({
         } catch (error) {
             console.error('Erro ao salvar:', error)
         } finally {
-            // Só fecha o modal depois que o backend responder
             handleCloseProofModal()
         }
     }
@@ -289,75 +286,53 @@ export function RecentProofs({
                         ) => (
                             <article
                                 key={proof.id}
-                                className={`flex flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5 md:flex-row md:items-center md:justify-between ${index !==
-                                    proofs.length - 1
+                                className={`flex flex-col px-4 py-4 sm:px-6 sm:py-5 md:flex-row md:items-center md:justify-between ${index !== proofs.length - 1
                                     ? 'border-b border-[#A3B18A]/20'
                                     : ''
                                     }`}
                             >
                                 {/* INFORMAÇÕES DO COMPROVANTE */}
-                                <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                                <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-4">
                                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#A3B18A]/20 text-[#588157] sm:h-11 sm:w-11">
-                                        <FileImage
-                                            size={20}
-                                        />
+                                        <FileImage size={20} />
                                     </div>
 
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 flex-1">
                                         <p className="text-sm font-semibold text-[#2F4A33]">
-                                            {
-                                                proof.date
-                                            }
+                                            {proof.date}
                                         </p>
 
-                                        <p className="mt-1 truncate text-sm text-[#588157]">
-                                            {formatTimes(
-                                                proof.times,
-                                            )}
+                                        {/* AQUI: Removido truncate no mobile, adicionado md:truncate e wrap no texto */}
+                                        <p className="mt-1 text-sm leading-relaxed text-[#588157] md:truncate">
+                                            {formatTimes(proof.times)}
                                         </p>
                                     </div>
                                 </div>
 
                                 {/* AÇÕES */}
-                                <div className="flex shrink-0 items-center justify-end gap-4">
+                                {/* AQUI: Adicionado separação e espaçamento no celular */}
+                                <div className="mt-3 flex shrink-0 items-center justify-end gap-5 border-t border-[#A3B18A]/10 pt-3 md:mt-0 md:w-auto md:gap-4 md:border-0 md:pt-0">
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            handleEditClick(
-                                                proof,
-                                            )
+                                            handleEditClick(proof)
                                         }
                                         className="flex items-center gap-1.5 text-sm font-medium text-[#588157] transition-colors hover:text-[#2F4A33]"
                                     >
-                                        <span>
-                                            Editar
-                                        </span>
-
-                                        <ArrowUpRight
-                                            size={16}
-                                        />
+                                        <span>Editar</span>
+                                        <ArrowUpRight size={16} />
                                     </button>
 
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            handleDeleteClick(
-                                                proof,
-                                            )
+                                            handleDeleteClick(proof)
                                         }
-                                        disabled={
-                                            deletingId !==
-                                            null
-                                        }
+                                        disabled={deletingId !== null}
                                         className="flex items-center gap-1.5 text-sm font-medium text-red-500 transition-colors hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
-                                        <Trash2
-                                            size={16}
-                                        />
-
-                                        <span>
-                                            Excluir
-                                        </span>
+                                        <Trash2 size={16} />
+                                        <span>Excluir</span>
                                     </button>
                                 </div>
                             </article>
@@ -368,40 +343,22 @@ export function RecentProofs({
 
             {/* MODAL DE COMPENSAÇÃO */}
             <CompensationModal
-                isOpen={
-                    isCompensationModalOpen
-                }
-                onClose={
-                    onCloseCompensation
-                }
-                onSubmit={
-                    onCompensationSubmit
-                }
-                editingTransaction={
-                    editingCompensation
-                }
+                isOpen={isCompensationModalOpen}
+                onClose={onCloseCompensation}
+                onSubmit={onCompensationSubmit}
+                editingTransaction={editingCompensation}
             />
 
             {/* MODAL DE COMPROVANTE */}
             <ProofModal
-                isOpen={
-                    isProofModalOpen
-                }
-                onClose={
-                    handleCloseProofModal
-                }
-                onSubmit={
-                    handleProofSubmit
-                }
+                isOpen={isProofModalOpen}
+                onClose={handleCloseProofModal}
+                onSubmit={handleProofSubmit}
                 initialData={
                     proofToEdit
                         ? {
-                            date: normalizeDate(
-                                proofToEdit.date,
-                            ),
-                            times: [
-                                ...proofToEdit.times,
-                            ],
+                            date: normalizeDate(proofToEdit.date),
+                            times: [...proofToEdit.times],
                         }
                         : undefined
                 }
