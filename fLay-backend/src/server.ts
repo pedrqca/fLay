@@ -18,6 +18,7 @@ const frontendUrl =
 
 await app.register(cors, {
     origin: frontendUrl,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 })
 
 app.get('/', async () => {
@@ -45,7 +46,7 @@ const start = async () => {
         })
 
         console.log(
-            `🚀 API running on port ${port} `,
+            `🚀 API running on port ${port}`,
         )
     } catch (error) {
         app.log.error(error)
