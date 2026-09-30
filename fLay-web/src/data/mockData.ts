@@ -1,4 +1,4 @@
-import type { Weekday } from '../utils/workdayCalculator'
+import type { Weekday } from '../../../fLay-backend/src/utils/workdayCalculator'
 
 export const currentWeek: Weekday[] = [
     {

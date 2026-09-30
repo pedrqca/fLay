@@ -1,73 +1,206 @@
 import {
     Check,
     ChevronDown,
-    ChevronUp,
     Clock3,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import {
+    useEffect,
+    useRef,
+    useState,
+} from 'react'
 
 interface TimePickerProps {
     value: string
-    onChange: (time: string) => void
+    onChange: (value: string) => void
     placeholder?: string
+    onEnter?: () => void
 }
 
-function parseTime(time: string) {
-    if (!time) {
-        return {
-            hours: 0,
-            minutes: 0,
+const hours = Array.from(
+    { length: 24 },
+    (_, index) =>
+        index.toString().padStart(2, '0'),
+)
+
+const minutes = Array.from(
+    { length: 60 },
+    (_, index) =>
+        index.toString().padStart(2, '0'),
+)
+
+function normalizeTime(
+    value: string,
+): string | null {
+    const trimmedValue =
+        value.trim()
+
+    if (!trimmedValue) {
+        return null
+    }
+
+    // Formato HH:mm
+    if (
+        trimmedValue.includes(':')
+    ) {
+        const [
+            hourPart,
+            minutePart,
+        ] = trimmedValue.split(':')
+
+        if (
+            !hourPart ||
+            !minutePart ||
+            !/^\d{1,2}$/.test(
+                hourPart,
+            ) ||
+            !/^\d{1,2}$/.test(
+                minutePart,
+            )
+        ) {
+            return null
         }
+
+        const hour = Number(
+            hourPart,
+        )
+
+        const minute = Number(
+            minutePart,
+        )
+
+        if (
+            hour < 0 ||
+            hour > 23 ||
+            minute < 0 ||
+            minute > 59
+        ) {
+            return null
+        }
+
+        return `${hour
+            .toString()
+            .padStart(2, '0')}:${minute
+                .toString()
+                .padStart(2, '0')}`
     }
 
-    const [hours, minutes] = time
-        .split(':')
-        .map(Number)
+    const digits =
+        trimmedValue.replace(
+            /\D/g,
+            '',
+        )
 
-    return {
-        hours: Number.isNaN(hours)
-            ? 0
-            : hours,
-        minutes: Number.isNaN(minutes)
-            ? 0
-            : minutes,
+    // HH → HH:00
+    if (digits.length <= 2) {
+        const hour = Number(digits)
+
+        if (
+            hour < 0 ||
+            hour > 23
+        ) {
+            return null
+        }
+
+        return `${hour
+            .toString()
+            .padStart(2, '0')}:00`
     }
+
+    // HHmm → HH:mm
+    if (digits.length === 4) {
+        const hour = Number(
+            digits.slice(0, 2),
+        )
+
+        const minute = Number(
+            digits.slice(2, 4),
+        )
+
+        if (
+            hour < 0 ||
+            hour > 23 ||
+            minute < 0 ||
+            minute > 59
+        ) {
+            return null
+        }
+
+        return `${hour
+            .toString()
+            .padStart(2, '0')}:${minute
+                .toString()
+                .padStart(2, '0')}`
+    }
+
+    return null
 }
 
-function formatTime(
-    hours: number,
-    minutes: number,
-): string {
-    return `${String(hours).padStart(2, '0')}:${String(
-        minutes,
-    ).padStart(2, '0')}`
+function isValidTime(
+    value: string,
+): boolean {
+    const normalized =
+        normalizeTime(value)
+
+    return normalized !== null
 }
 
 export function TimePicker({
     value,
     onChange,
-    placeholder = 'Selecione uma duração',
+    placeholder = 'Selecionar horário',
+    onEnter,
 }: TimePickerProps) {
-    const [isOpen, setIsOpen] = useState(false)
+    const [
+        isOpen,
+        setIsOpen,
+    ] = useState(false)
 
-    const initialTime = parseTime(value)
+    const [
+        openUpwards,
+        setOpenUpwards,
+    ] = useState(false)
 
-    const [hours, setHours] = useState(
-        initialTime.hours,
+    const [
+        inputValue,
+        setInputValue,
+    ] = useState(value)
+
+    const [
+        selectedHour,
+        setSelectedHour,
+    ] = useState(
+        value
+            ? value.split(':')[0]
+            : '08',
     )
 
-    const [minutes, setMinutes] = useState(
-        initialTime.minutes,
+    const [
+        selectedMinute,
+        setSelectedMinute,
+    ] = useState(
+        value
+            ? value.split(':')[1]
+            : '00',
     )
 
     const containerRef =
         useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-        const parsedTime = parseTime(value)
+    const inputRef =
+        useRef<HTMLInputElement>(null)
 
-        setHours(parsedTime.hours)
-        setMinutes(parsedTime.minutes)
+    useEffect(() => {
+        setInputValue(value)
+
+        if (value.includes(':')) {
+            const [
+                hour,
+                minute,
+            ] = value.split(':')
+
+            setSelectedHour(hour)
+            setSelectedMinute(minute)
+        }
     }, [value])
 
     useEffect(() => {
@@ -97,314 +230,314 @@ export function TimePicker({
         }
     }, [])
 
-    function updateHours(
-        newValue: string,
-    ) {
-        const numericValue =
-            newValue.replace(/\D/g, '')
-
-        if (numericValue === '') {
-            setHours(0)
+    function handleOpen() {
+        if (!containerRef.current) {
+            setIsOpen(true)
             return
         }
 
-        const parsedValue =
-            Number(numericValue)
+        const rect =
+            containerRef.current.getBoundingClientRect()
 
-        if (parsedValue > 23) {
-            setHours(23)
-            return
-        }
+        const estimatedDropdownHeight = 360
 
-        setHours(parsedValue)
+        const spaceBelow =
+            window.innerHeight - rect.bottom
+
+        const spaceAbove = rect.top
+
+        setOpenUpwards(
+            spaceBelow <
+            estimatedDropdownHeight &&
+            spaceAbove > spaceBelow,
+        )
+
+        setIsOpen((current) => !current)
     }
 
-    function updateMinutes(
-        newValue: string,
+    function handleInputChange(
+        event: React.ChangeEvent<HTMLInputElement>,
     ) {
-        const numericValue =
-            newValue.replace(/\D/g, '')
+        let value =
+            event.target.value
 
-        if (numericValue === '') {
-            setMinutes(0)
-            return
-        }
+        const digits =
+            value.replace(/\D/g, '')
 
-        const parsedValue =
-            Number(numericValue)
+        if (digits.length <= 4) {
+            if (digits.length === 4) {
+                const normalized =
+                    normalizeTime(digits)
 
-        if (parsedValue > 59) {
-            setMinutes(59)
-            return
-        }
+                if (normalized) {
+                    setInputValue(
+                        normalized,
+                    )
 
-        setMinutes(parsedValue)
-    }
+                    const [
+                        hour,
+                        minute,
+                    ] =
+                        normalized.split(':')
 
-    function changeHours(
-        direction: 'up' | 'down',
-    ) {
-        setHours((currentHours) => {
-            if (direction === 'up') {
-                return currentHours >= 23
-                    ? 0
-                    : currentHours + 1
+                    setSelectedHour(hour)
+                    setSelectedMinute(
+                        minute,
+                    )
+
+                    onChange(normalized)
+                } else {
+                    setInputValue(
+                        digits,
+                    )
+                }
+
+                return
             }
 
-            return currentHours <= 0
-                ? 23
-                : currentHours - 1
-        })
+            setInputValue(value)
+        }
     }
 
-    function changeMinutes(
-        direction: 'up' | 'down',
+    function handleInputKeyDown(
+        event: React.KeyboardEvent<HTMLInputElement>,
     ) {
-        setMinutes((currentMinutes) => {
-            if (direction === 'up') {
-                return currentMinutes >= 59
-                    ? 0
-                    : currentMinutes + 1
-            }
+        if (
+            event.key !== 'Enter'
+        ) {
+            return
+        }
 
-            return currentMinutes <= 0
-                ? 59
-                : currentMinutes - 1
-        })
+        event.preventDefault()
+
+        const normalized =
+            normalizeTime(inputValue)
+
+        if (!normalized) {
+            return
+        }
+
+        setInputValue(normalized)
+        onChange(normalized)
+        setIsOpen(false)
+
+        onEnter?.()
+    }
+
+    function handleSelectHour(
+        hour: string,
+    ) {
+        setSelectedHour(hour)
+
+        const newValue = `${hour}:${selectedMinute}`
+
+        setInputValue(newValue)
+        onChange(newValue)
+    }
+
+    function handleSelectMinute(
+        minute: string,
+    ) {
+        setSelectedMinute(minute)
+
+        const newValue = `${selectedHour}:${minute}`
+
+        setInputValue(newValue)
+        onChange(newValue)
     }
 
     function handleConfirm() {
-        const formattedTime = formatTime(
-            hours,
-            minutes,
-        )
+        const newValue = `${selectedHour}:${selectedMinute}`
 
-        onChange(formattedTime)
+        setInputValue(newValue)
+        onChange(newValue)
         setIsOpen(false)
-    }
 
-    function handleHoursBlur() {
-        if (hours < 0) {
-            setHours(0)
-            return
-        }
-
-        if (hours > 23) {
-            setHours(23)
-        }
-    }
-
-    function handleMinutesBlur() {
-        if (minutes < 0) {
-            setMinutes(0)
-            return
-        }
-
-        if (minutes > 59) {
-            setMinutes(59)
-        }
+        inputRef.current?.focus()
     }
 
     return (
         <div
             ref={containerRef}
-            className="relative"
+            className="relative w-full"
         >
-            <button
-                type="button"
-                onClick={() =>
-                    setIsOpen((open) => !open)
-                }
-                className={`flex w-full items-center justify-between rounded-xl border bg-[#FAF9F6] px-4 py-3 text-sm outline-none transition-colors ${isOpen
-                        ? 'border-[#588157]'
-                        : 'border-[#A3B18A]/40'
-                    }`}
-            >
-                <span
-                    className={
-                        value
-                            ? 'text-[#2F4A33]'
-                            : 'text-[#A3B18A]'
-                    }
-                >
-                    {value
-                        ? value
-                        : placeholder}
-                </span>
-
+            <div className="flex w-full items-center rounded-xl border border-[#A3B18A]/40 bg-white transition-colors focus-within:border-[#588157] focus-within:ring-2 focus-within:ring-[#A3B18A]/20">
                 <Clock3
                     size={18}
-                    className="text-[#588157]"
+                    className="ml-4 shrink-0 text-[#588157]"
                 />
-            </button>
+
+                <input
+                    ref={inputRef}
+                    type="text"
+                    inputMode="numeric"
+                    value={inputValue}
+                    onChange={
+                        handleInputChange
+                    }
+                    onKeyDown={
+                        handleInputKeyDown
+                    }
+                    placeholder={
+                        placeholder
+                    }
+                    maxLength={5}
+                    className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-[#2F4A33] outline-none placeholder:text-[#A3B18A]"
+                    aria-label={
+                        placeholder
+                    }
+                />
+
+                <button
+                    type="button"
+                    onClick={handleOpen}
+                    className="mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
+                    aria-label="Abrir seletor de horário"
+                >
+                    <ChevronDown
+                        size={18}
+                        className={
+                            isOpen
+                                ? 'rotate-180 transition-transform'
+                                : 'transition-transform'
+                        }
+                    />
+                </button>
+            </div>
 
             {isOpen && (
-                <div className="absolute left-0 top-full z-50 mt-2 w-full min-w-[300px] rounded-2xl border border-[#A3B18A]/30 bg-white p-5 shadow-xl">
-                    <div className="mb-5 text-center">
+                <div
+                    className={`absolute left-0 z-[60] w-full min-w-[300px] rounded-2xl border border-[#A3B18A]/30 bg-white p-5 shadow-xl ${openUpwards
+                        ? 'bottom-full mb-2'
+                        : 'top-full mt-2'
+                        }`}
+                >
+                    <div className="mb-4">
                         <p className="text-sm font-semibold text-[#2F4A33]">
-                            Horas compensadas
+                            Selecionar horário
                         </p>
 
-                        <p className="mt-1 text-xs text-[#A3B18A]">
-                            Digite ou ajuste a duração
+                        <p className="mt-1 text-xs text-[#588157]">
+                            Você também pode digitar, por exemplo, 0802.
                         </p>
                     </div>
 
-                    <div className="flex items-center justify-center gap-4">
-                        {/* HORAS */}
-                        <div className="flex flex-col items-center">
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    changeHours(
-                                        'up',
-                                    )
-                                }
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
-                                aria-label="Aumentar horas"
-                            >
-                                <ChevronUp
-                                    size={18}
-                                />
-                            </button>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#A3B18A]">
+                                Hora
+                            </p>
 
-                            <input
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                value={String(
-                                    hours,
-                                ).padStart(
-                                    2,
-                                    '0',
+                            <div className="max-h-48 overflow-y-auto rounded-xl border border-[#A3B18A]/30">
+                                {hours.map(
+                                    (hour) => (
+                                        <button
+                                            key={
+                                                hour
+                                            }
+                                            type="button"
+                                            onClick={() =>
+                                                handleSelectHour(
+                                                    hour,
+                                                )
+                                            }
+                                            className={`flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors ${selectedHour ===
+                                                hour
+                                                ? 'bg-[#A3B18A]/20 font-semibold text-[#2F4A33]'
+                                                : 'text-[#588157] hover:bg-[#DAD7CD]'
+                                                }`}
+                                        >
+                                            <span>
+                                                {
+                                                    hour
+                                                }
+                                            </span>
+
+                                            {selectedHour ===
+                                                hour && (
+                                                    <Check
+                                                        size={
+                                                            16
+                                                        }
+                                                    />
+                                                )}
+                                        </button>
+                                    ),
                                 )}
-                                onChange={(event) =>
-                                    updateHours(
-                                        event
-                                            .target
-                                            .value,
-                                    )
-                                }
-                                onBlur={
-                                    handleHoursBlur
-                                }
-                                onFocus={(event) =>
-                                    event.currentTarget.select()
-                                }
-                                className="h-16 w-20 rounded-xl bg-[#A3B18A]/15 text-center text-3xl font-semibold tracking-tight text-[#2F4A33] outline-none transition-colors focus:bg-[#A3B18A]/25 focus:ring-2 focus:ring-[#588157]/20"
-                                aria-label="Horas"
-                            />
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    changeHours(
-                                        'down',
-                                    )
-                                }
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
-                                aria-label="Diminuir horas"
-                            >
-                                <ChevronDown
-                                    size={18}
-                                />
-                            </button>
-
-                            <span className="mt-1 text-xs text-[#A3B18A]">
-                                horas
-                            </span>
+                            </div>
                         </div>
 
-                        <span className="mb-5 text-2xl font-semibold text-[#A3B18A]">
-                            :
-                        </span>
+                        <div>
+                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#A3B18A]">
+                                Minuto
+                            </p>
 
-                        {/* MINUTOS */}
-                        <div className="flex flex-col items-center">
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    changeMinutes(
-                                        'up',
-                                    )
-                                }
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
-                                aria-label="Aumentar minutos"
-                            >
-                                <ChevronUp
-                                    size={18}
-                                />
-                            </button>
+                            <div className="max-h-48 overflow-y-auto rounded-xl border border-[#A3B18A]/30">
+                                {minutes.map(
+                                    (
+                                        minute,
+                                    ) => (
+                                        <button
+                                            key={
+                                                minute
+                                            }
+                                            type="button"
+                                            onClick={() =>
+                                                handleSelectMinute(
+                                                    minute,
+                                                )
+                                            }
+                                            className={`flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors ${selectedMinute ===
+                                                minute
+                                                ? 'bg-[#A3B18A]/20 font-semibold text-[#2F4A33]'
+                                                : 'text-[#588157] hover:bg-[#DAD7CD]'
+                                                }`}
+                                        >
+                                            <span>
+                                                {
+                                                    minute
+                                                }
+                                            </span>
 
-                            <input
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                value={String(
-                                    minutes,
-                                ).padStart(
-                                    2,
-                                    '0',
+                                            {selectedMinute ===
+                                                minute && (
+                                                    <Check
+                                                        size={
+                                                            16
+                                                        }
+                                                    />
+                                                )}
+                                        </button>
+                                    ),
                                 )}
-                                onChange={(event) =>
-                                    updateMinutes(
-                                        event
-                                            .target
-                                            .value,
-                                    )
-                                }
-                                onBlur={
-                                    handleMinutesBlur
-                                }
-                                onFocus={(event) =>
-                                    event.currentTarget.select()
-                                }
-                                className="h-16 w-20 rounded-xl bg-[#A3B18A]/15 text-center text-3xl font-semibold tracking-tight text-[#2F4A33] outline-none transition-colors focus:bg-[#A3B18A]/25 focus:ring-2 focus:ring-[#588157]/20"
-                                aria-label="Minutos"
-                            />
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    changeMinutes(
-                                        'down',
-                                    )
-                                }
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
-                                aria-label="Diminuir minutos"
-                            >
-                                <ChevronDown
-                                    size={18}
-                                />
-                            </button>
-
-                            <span className="mt-1 text-xs text-[#A3B18A]">
-                                minutos
-                            </span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-between rounded-xl bg-[#FAF9F6] px-4 py-3">
-                        <span className="text-sm text-[#588157]">
-                            Total
-                        </span>
+                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#A3B18A]/20 pt-4">
+                        <p className="text-sm text-[#588157]">
+                            Horário:{' '}
+                            <span className="font-semibold text-[#2F4A33]">
+                                {selectedHour}:
+                                {
+                                    selectedMinute
+                                }
+                            </span>
+                        </p>
 
-                        <span className="text-base font-semibold text-[#2F4A33]">
-                            {formatTime(
-                                hours,
-                                minutes,
-                            )}
-                        </span>
+                        <button
+                            type="button"
+                            onClick={
+                                handleConfirm
+                            }
+                            className="flex items-center gap-2 rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33]"
+                        >
+                            <Check
+                                size={16}
+                            />
+                            Confirmar horário
+                        </button>
                     </div>
-
-                    <button
-                        type="button"
-                        onClick={handleConfirm}
-                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#588157] py-3 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33]"
-                    >
-                        <Check size={17} />
-                        Confirmar horário
-                    </button>
                 </div>
             )}
         </div>

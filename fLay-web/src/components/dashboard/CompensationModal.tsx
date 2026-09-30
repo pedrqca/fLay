@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { DatePicker } from '../ui/DatePicker'
 import { TimePicker } from '../ui/TimePicker'
@@ -10,21 +10,101 @@ export interface CompensationData {
     description: string
 }
 
+export interface CompensationToEdit {
+    id: number
+    date: string
+    minutes: number
+    description: string
+}
+
 interface CompensationModalProps {
     isOpen: boolean
     onClose: () => void
     onSubmit: (data: CompensationData) => void
+    editingTransaction?: CompensationToEdit | null
+}
+
+function formatDateForInput(
+    date: string,
+): string {
+    const datePart = date.split('T')[0]
+
+    return datePart
+}
+
+function formatMinutesToHours(
+    minutes: number,
+): string {
+    const hours = Math.floor(
+        minutes / 60,
+    )
+
+    const remainingMinutes =
+        minutes % 60
+
+    return `${hours
+        .toString()
+        .padStart(2, '0')}:${remainingMinutes
+            .toString()
+            .padStart(2, '0')}`
 }
 
 export function CompensationModal({
     isOpen,
     onClose,
     onSubmit,
+    editingTransaction = null,
 }: CompensationModalProps) {
-    const [date, setDate] = useState('')
-    const [hours, setHours] = useState('')
-    const [description, setDescription] =
-        useState('')
+    const [
+        date,
+        setDate,
+    ] = useState('')
+
+    const [
+        hours,
+        setHours,
+    ] = useState('')
+
+    const [
+        description,
+        setDescription,
+    ] = useState('')
+
+    const isEditing =
+        editingTransaction !== null
+
+    useEffect(() => {
+        if (!isOpen) {
+            return
+        }
+
+        if (editingTransaction) {
+            setDate(
+                formatDateForInput(
+                    editingTransaction.date,
+                ),
+            )
+
+            setHours(
+                formatMinutesToHours(
+                    editingTransaction.minutes,
+                ),
+            )
+
+            setDescription(
+                editingTransaction.description,
+            )
+
+            return
+        }
+
+        setDate('')
+        setHours('')
+        setDescription('')
+    }, [
+        isOpen,
+        editingTransaction,
+    ])
 
     if (!isOpen) {
         return null
@@ -40,8 +120,6 @@ export function CompensationModal({
             hours,
             description,
         })
-
-        onClose()
     }
 
     return (
@@ -50,11 +128,15 @@ export function CompensationModal({
                 <div className="mb-6 flex items-start justify-between gap-4">
                     <div className="min-w-0">
                         <h2 className="text-lg font-semibold tracking-tight text-[#2F4A33] sm:text-xl">
-                            Registrar compensação
+                            {isEditing
+                                ? 'Editar compensação'
+                                : 'Registrar compensação'}
                         </h2>
 
                         <p className="mt-1 text-sm leading-5 text-[#588157]">
-                            Registre horas utilizadas do seu banco.
+                            {isEditing
+                                ? 'Atualize os dados da compensação.'
+                                : 'Registre horas utilizadas do seu banco.'}
                         </p>
                     </div>
 
@@ -134,7 +216,9 @@ export function CompensationModal({
                             type="submit"
                             className="w-full rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] sm:w-auto"
                         >
-                            Registrar compensação
+                            {isEditing
+                                ? 'Salvar alterações'
+                                : 'Registrar compensação'}
                         </button>
                     </div>
                 </form>

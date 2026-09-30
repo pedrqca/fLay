@@ -23,8 +23,9 @@ model Workday {
   date      DateTime
   createdAt DateTime @default(now())
 
-  user        User        @relation(fields: [userId], references: [id])
-  timeEntries TimeEntry[]
+  user            User             @relation(fields: [userId], references: [id])
+  timeEntries     TimeEntry[]
+  bankTransaction BankTransaction?
 
   @@unique([userId, date])
   @@index([userId, date])
@@ -44,13 +45,15 @@ model TimeEntry {
 model BankTransaction {
   id          Int      @id @default(autoincrement())
   userId      Int
+  workdayId   Int?     @unique
   date        DateTime
   type        String
   minutes     Int
   description String
   createdAt   DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+  workday Workday? @relation(fields: [workdayId], references: [id])
 
   @@index([userId, date])
 }

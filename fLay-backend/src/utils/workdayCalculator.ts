@@ -1,8 +1,5 @@
 interface WorkdayInput {
-    entry: string
-    lunchExit: string
-    lunchReturn: string
-    exit: string
+    times: string[]
     expectedMinutes: number
 }
 
@@ -16,10 +13,7 @@ export interface WorkdayResult {
 export interface Weekday {
     date: string
     day: string
-    entry: string
-    lunchExit: string
-    lunchReturn: string
-    exit: string
+    times: string[]
     expectedMinutes: number
 }
 
@@ -34,8 +28,11 @@ export interface WeekResult {
     }>
 }
 
-function timeToMinutes(time: string): number {
-    const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/
+function timeToMinutes(
+    time: string,
+): number {
+    const timePattern =
+        /^([01]\d|2[0-3]):([0-5]\d)$/
 
     if (!timePattern.test(time)) {
         throw new Error(
@@ -43,9 +40,14 @@ function timeToMinutes(time: string): number {
         )
     }
 
-    const parts = time.split(':')
-    const hours = Number(parts[0])
-    const minutes = Number(parts[1])
+    const parts =
+        time.split(':')
+
+    const hours =
+        Number(parts[0])
+
+    const minutes =
+        Number(parts[1])
 
     if (
         Number.isNaN(hours) ||
@@ -60,31 +62,86 @@ function timeToMinutes(time: string): number {
 }
 
 export function calculateWorkday({
-    entry,
-    lunchExit,
-    lunchReturn,
-    exit,
+    times,
     expectedMinutes,
 }: WorkdayInput): WorkdayResult {
-    const entryMinutes = timeToMinutes(entry)
-    const lunchExitMinutes = timeToMinutes(lunchExit)
-    const lunchReturnMinutes = timeToMinutes(lunchReturn)
-    const exitMinutes = timeToMinutes(exit)
+    if (
+        times.length === 0 ||
+        times.length % 2 !== 0
+    ) {
+        throw new Error(
+            'Uma jornada precisa possuir uma quantidade par de horários.',
+        )
+    }
 
-    const lunchMinutes =
-        lunchReturnMinutes - lunchExitMinutes
+    const minutes =
+        times.map(timeToMinutes)
 
-    const morningMinutes =
-        lunchExitMinutes - entryMinutes
+    let workedMinutes = 0
 
-    const afternoonMinutes =
-        exitMinutes - lunchReturnMinutes
+    for (
+        let index = 0;
+        index < minutes.length;
+        index += 2
+    ) {
+        const entry =
+            minutes[index]
 
-    const workedMinutes =
-        morningMinutes + afternoonMinutes
+        const exit =
+            minutes[index + 1]
+
+        if (
+            entry === undefined ||
+            exit === undefined
+        ) {
+            throw new Error(
+                'A jornada possui registros de horário incompletos.',
+            )
+        }
+
+        if (
+            exit < entry
+        ) {
+            throw new Error(
+                `O horário de saída (${times[index + 1]}) não pode ser anterior ao horário de entrada (${times[index]}).`,
+            )
+        }
+
+        workedMinutes +=
+            exit - entry
+    }
+
+    let lunchMinutes = 0
+
+    if (minutes.length >= 4) {
+        for (
+            let index = 1;
+            index < minutes.length - 1;
+            index += 2
+        ) {
+            const exit =
+                minutes[index]
+
+            const nextEntry =
+                minutes[index + 1]
+
+            if (
+                exit === undefined ||
+                nextEntry === undefined
+            ) {
+                throw new Error(
+                    'O intervalo da jornada possui registros incompletos.',
+                )
+            }
+
+            lunchMinutes +=
+                nextEntry - exit
+        }
+    }
 
     const balanceMinutes =
-        workedMinutes - expectedMinutes
+        workedMinutes -
+        expectedMinutes
 
     return {
         lunchMinutes,
@@ -97,36 +154,50 @@ export function calculateWorkday({
 export function calculateWeek(
     weekdays: Weekday[],
 ): WeekResult {
-    const days = weekdays.map((weekday) => {
-        const result = calculateWorkday({
-            entry: weekday.entry,
-            lunchExit: weekday.lunchExit,
-            lunchReturn: weekday.lunchReturn,
-            exit: weekday.exit,
-            expectedMinutes: weekday.expectedMinutes,
-        })
+    const days = weekdays.map(
+        (weekday) => {
+            const result =
+                calculateWorkday({
+                    times: weekday.times,
+                    expectedMinutes:
+                        weekday.expectedMinutes,
+                })
 
-        return {
-            date: weekday.date,
-            day: weekday.day,
-            result,
-        }
-    })
-
-    const totalWorkedMinutes = days.reduce(
-        (total, day) =>
-            total + day.result.workedMinutes,
-        0,
+            return {
+                date: weekday.date,
+                day: weekday.day,
+                result,
+            }
+        },
     )
 
-    const totalExpectedMinutes = days.reduce(
-        (total, day) =>
-            total + day.result.expectedMinutes,
-        0,
-    )
+    const totalWorkedMinutes =
+        days.reduce(
+            (
+                total,
+                day,
+            ) =>
+                total +
+                day.result
+                    .workedMinutes,
+            0,
+        )
+
+    const totalExpectedMinutes =
+        days.reduce(
+            (
+                total,
+                day,
+            ) =>
+                total +
+                day.result
+                    .expectedMinutes,
+            0,
+        )
 
     const totalBalanceMinutes =
-        totalWorkedMinutes - totalExpectedMinutes
+        totalWorkedMinutes -
+        totalExpectedMinutes
 
     return {
         totalWorkedMinutes,

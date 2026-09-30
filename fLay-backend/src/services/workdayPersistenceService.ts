@@ -8,19 +8,57 @@ export async function saveWorkday(
     workday: Workday,
     bankTransaction: BankTransaction | null,
 ) {
-    let savedWorkday
-
     try {
-        savedWorkday =
-            await prisma.workday.create({
-                data: {
-                    userId,
-                    date: new Date(workday.date),
+        const savedWorkday =
+            await prisma.$transaction(
+                async (transaction) => {
+                    const savedWorkday =
+                        await transaction.workday.create({
+                            data: {
+                                userId,
+                                date: new Date(
+                                    workday.date,
+                                ),
+                            },
+                        })
+
+                    await transaction.timeEntry.createMany({
+                        data: workday.times.map(
+                            (time) => ({
+                                workdayId:
+                                    savedWorkday.id,
+                                time,
+                            }),
+                        ),
+                    })
+
+                    if (bankTransaction) {
+                        await transaction.bankTransaction.create({
+                            data: {
+                                userId,
+                                workdayId:
+                                    savedWorkday.id,
+                                date: new Date(
+                                    bankTransaction.date,
+                                ),
+                                type: bankTransaction.type,
+                                minutes:
+                                    bankTransaction.minutes,
+                                description:
+                                    bankTransaction.description,
+                            },
+                        })
+                    }
+
+                    return savedWorkday
                 },
-            })
+            )
+
+        return savedWorkday
     } catch (error) {
         if (
-            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error instanceof
+            Prisma.PrismaClientKnownRequestError &&
             error.code === 'P2002'
         ) {
             throw new Error(
@@ -30,35 +68,136 @@ export async function saveWorkday(
 
         throw error
     }
+}
 
-    const timeEntries = [
-        workday.entry,
-        workday.lunchExit,
-        workday.lunchReturn,
-        workday.exit,
-    ]
+export async function updateWorkday(
+    workdayId: number,
+    workday: Workday,
+    bankTransaction: BankTransaction | null,
+) {
+    return prisma.$transaction(
+        async (transaction) => {
+            const existingWorkday =
+                await transaction.workday.findUnique({
+                    where: {
+                        id: workdayId,
+                    },
+                })
 
-    await prisma.timeEntry.createMany({
-        data: timeEntries.map((time) => ({
-            workdayId: savedWorkday.id,
-            time,
-        })),
-    })
+            if (!existingWorkday) {
+                throw new Error(
+                    'Jornada não encontrada.',
+                )
+            }
 
-    if (bankTransaction) {
-        await prisma.bankTransaction.create({
-            data: {
-                userId,
-                date: new Date(
-                    bankTransaction.date,
+            const updatedWorkday =
+                await transaction.workday.update({
+                    where: {
+                        id: workdayId,
+                    },
+                    data: {
+                        date: new Date(
+                            workday.date,
+                        ),
+                    },
+                })
+
+            await transaction.timeEntry.deleteMany({
+                where: {
+                    workdayId,
+                },
+            })
+
+            await transaction.timeEntry.createMany({
+                data: workday.times.map(
+                    (time) => ({
+                        workdayId,
+                        time,
+                    }),
                 ),
-                type: bankTransaction.type,
-                minutes: bankTransaction.minutes,
-                description:
-                    bankTransaction.description,
-            },
-        })
-    }
+            })
 
-    return savedWorkday
+            const existingBankTransaction =
+                await transaction.bankTransaction.findUnique({
+                    where: {
+                        workdayId,
+                    },
+                })
+
+            if (bankTransaction) {
+                if (existingBankTransaction) {
+                    await transaction.bankTransaction.update({
+                        where: {
+                            workdayId,
+                        },
+                        data: {
+                            date: new Date(
+                                bankTransaction.date,
+                            ),
+                            type: bankTransaction.type,
+                            minutes:
+                                bankTransaction.minutes,
+                            description:
+                                bankTransaction.description,
+                        },
+                    })
+                } else {
+                    await transaction.bankTransaction.create({
+                        data: {
+                            userId:
+                                existingWorkday.userId,
+                            workdayId,
+                            date: new Date(
+                                bankTransaction.date,
+                            ),
+                            type: bankTransaction.type,
+                            minutes:
+                                bankTransaction.minutes,
+                            description:
+                                bankTransaction.description,
+                        },
+                    })
+                }
+            } else if (
+                existingBankTransaction
+            ) {
+                await transaction.bankTransaction.delete({
+                    where: {
+                        workdayId,
+                    },
+                })
+            }
+
+            return updatedWorkday
+        },
+    )
+}
+
+export async function deleteWorkday(
+    workdayId: number,
+) {
+    return prisma.$transaction(
+        async (transaction) => {
+            await transaction.bankTransaction.deleteMany({
+                where: {
+                    workdayId,
+                },
+            })
+
+            await transaction.timeEntry.deleteMany({
+                where: {
+                    workdayId,
+                },
+            })
+
+            const deletedWorkday =
+                await transaction.workday.delete({
+                    where: {
+                        id: workdayId,
+                    },
+                })
+
+            return deletedWorkday
+        },
+    )
 }

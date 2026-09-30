@@ -2,18 +2,18 @@ import type { ParsedProof } from './proofParser.js'
 
 export interface Workday {
     date: string
-    entry: string
-    lunchExit: string
-    lunchReturn: string
-    exit: string
+    times: string[]
 }
 
 export function buildWorkday(
     proofs: ParsedProof[],
 ): Workday {
-    if (proofs.length !== 4) {
+    if (
+        proofs.length === 0 ||
+        proofs.length % 2 !== 0
+    ) {
         throw new Error(
-            'A jornada deve possuir exatamente 4 registros de ponto.',
+            'A jornada deve possuir uma quantidade par de registros de ponto.',
         )
     }
 
@@ -21,25 +21,15 @@ export function buildWorkday(
         (a, b) => a.time.localeCompare(b.time),
     )
 
-    const [
-        entryProof,
-        lunchExitProof,
-        lunchReturnProof,
-        exitProof,
-    ] = sortedProofs
+    const firstProof = sortedProofs[0]
 
-    if (
-        !entryProof ||
-        !lunchExitProof ||
-        !lunchReturnProof ||
-        !exitProof
-    ) {
+    if (!firstProof) {
         throw new Error(
             'Não foi possível organizar os registros da jornada.',
         )
     }
 
-    const firstDate = entryProof.date
+    const firstDate = firstProof.date
 
     if (!firstDate) {
         throw new Error(
@@ -47,9 +37,11 @@ export function buildWorkday(
         )
     }
 
-    const hasDifferentDate = sortedProofs.some(
-        (proof) => proof.date !== firstDate,
-    )
+    const hasDifferentDate =
+        sortedProofs.some(
+            (proof) =>
+                proof.date !== firstDate,
+        )
 
     if (hasDifferentDate) {
         throw new Error(
@@ -59,9 +51,8 @@ export function buildWorkday(
 
     return {
         date: firstDate,
-        entry: entryProof.time,
-        lunchExit: lunchExitProof.time,
-        lunchReturn: lunchReturnProof.time,
-        exit: exitProof.time,
+        times: sortedProofs.map(
+            (proof) => proof.time,
+        ),
     }
 }
