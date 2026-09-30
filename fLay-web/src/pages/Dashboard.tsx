@@ -23,7 +23,6 @@ import {
 
 import {
     calculateBankBalance,
-    createBankTransactionsFromWeek,
 } from '../../../fLay-backend/src/utils/bankCalculator'
 
 import type {
@@ -66,10 +65,76 @@ import type {
     ProofData,
 } from '../components/dashboard/ProofModal'
 
+function formatDateKey(
+    date: Date,
+): string {
+    const year =
+        date.getFullYear()
+
+    const month = String(
+        date.getMonth() + 1,
+    ).padStart(2, '0')
+
+    const day = String(
+        date.getDate(),
+    ).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+}
+
+function getCurrentWeekRange() {
+    const today = new Date()
+
+    const currentDay =
+        today.getDay()
+
+    const daysFromMonday =
+        currentDay === 0
+            ? -6
+            : 1 - currentDay
+
+    const startOfWeek =
+        new Date(today)
+
+    startOfWeek.setHours(
+        0,
+        0,
+        0,
+        0,
+    )
+
+    startOfWeek.setDate(
+        today.getDate() +
+        daysFromMonday,
+    )
+
+    const endOfWeek =
+        new Date(startOfWeek)
+
+    endOfWeek.setDate(
+        startOfWeek.getDate() + 6,
+    )
+
+    return {
+        start: formatDateKey(
+            startOfWeek,
+        ),
+        end: formatDateKey(
+            endOfWeek,
+        ),
+    }
+}
+
+function getWorkdayDateKey(
+    date: string,
+): string {
+    return date.split('T')[0]
+}
+
 export function Dashboard() {
     const [
-        compensationTransactions,
-        setCompensationTransactions,
+        bankTransactionsFromApi,
+        setBankTransactionsFromApi,
     ] = useState<ApiBankTransaction[]>([])
 
     const [
@@ -101,67 +166,92 @@ export function Dashboard() {
         setIsDeletingCompensation,
     ] = useState(false)
 
-    useEffect(() => {
-        Promise.all([
+    async function loadDashboardData() {
+        const [
+            updatedWorkdays,
+            updatedTransactions,
+        ] = await Promise.all([
             getWorkdays(1),
             getBankTransactions(1),
         ])
-            .then(
-                ([
-                    workdays,
-                    transactions,
-                ]) => {
-                    setWorkdays(workdays)
 
-                    setCompensationTransactions(
-                        transactions.filter(
-                            (
-                                transaction,
-                            ) =>
-                                transaction.type ===
-                                'COMPENSATION',
-                        ),
-                    )
-                },
-            )
-            .catch((error) => {
+        setWorkdays(
+            updatedWorkdays,
+        )
+
+        setBankTransactionsFromApi(
+            updatedTransactions,
+        )
+    }
+
+    useEffect(() => {
+        loadDashboardData().catch(
+            (error) => {
                 console.error(
                     'Erro ao carregar dados:',
                     error,
                 )
-            })
+            },
+        )
     }, [])
 
-    const weekdays =
-        mapWorkdaysToWeekdays(workdays)
-
-    const weekResult = calculateWeek(
-        weekdays,
-    )
-
-    const weeklyTransactions =
-        createBankTransactionsFromWeek(
-            weekResult,
+    const compensationTransactions =
+        bankTransactionsFromApi.filter(
+            (
+                transaction,
+            ) =>
+                transaction.type ===
+                'COMPENSATION',
         )
 
-    const compensationTransactionsForHistory: CalculatedBankTransaction[] =
-        compensationTransactions.map(
+    const currentWeek =
+        getCurrentWeekRange()
+
+    const currentWeekWorkdays =
+        workdays.filter(
+            (workday) => {
+                const workdayDate =
+                    getWorkdayDateKey(
+                        workday.date,
+                    )
+
+                return (
+                    workdayDate >=
+                    currentWeek.start &&
+                    workdayDate <=
+                    currentWeek.end
+                )
+            },
+        )
+
+    const weekdays =
+        mapWorkdaysToWeekdays(
+            currentWeekWorkdays,
+        )
+
+    const weekResult =
+        calculateWeek(
+            weekdays,
+        )
+
+    const bankTransactions: CalculatedBankTransaction[] =
+        bankTransactionsFromApi.map(
             (
                 transaction,
             ) => ({
-                date: transaction.date,
-                type: transaction.type,
+                date:
+                    transaction.date,
+
+                type:
+                    transaction.type,
+
                 minutes:
                     transaction.minutes,
+
                 description:
                     transaction.description,
             }),
         )
-
-    const bankTransactions: CalculatedBankTransaction[] = [
-        ...weeklyTransactions,
-        ...compensationTransactionsForHistory,
-    ]
 
     const bankResult =
         calculateBankBalance(
@@ -213,46 +303,18 @@ export function Dashboard() {
                 hours * 60 + minutes
 
             if (editingCompensation) {
-                const updatedTransaction =
-                    await updateBankTransaction(
-                        editingCompensation.id,
-                        {
-                            date: data.date,
-                            type: 'COMPENSATION',
-                            minutes:
-                                totalMinutes,
-                            description:
-                                data.description,
-                        },
-                    )
-
-                setCompensationTransactions(
-                    (
-                        currentTransactions,
-                    ) =>
-                        currentTransactions.map(
-                            (
-                                transaction,
-                            ) =>
-                                transaction.id ===
-                                    updatedTransaction.id
-                                    ? updatedTransaction
-                                    : transaction,
-                        ),
+                await updateBankTransaction(
+                    editingCompensation.id,
+                    {
+                        date: data.date,
+                        type: 'COMPENSATION',
+                        minutes:
+                            totalMinutes,
+                        description:
+                            data.description,
+                    },
                 )
-
-                setEditingCompensation(
-                    null,
-                )
-
-                setIsCompensationModalOpen(
-                    false,
-                )
-
-                return
-            }
-
-            const transaction =
+            } else {
                 await createBankTransaction(
                     {
                         userId: 1,
@@ -264,15 +326,9 @@ export function Dashboard() {
                             data.description,
                     },
                 )
+            }
 
-            setCompensationTransactions(
-                (
-                    currentTransactions,
-                ) => [
-                        ...currentTransactions,
-                        transaction,
-                    ],
-            )
+            await loadDashboardData()
 
             setEditingCompensation(
                 null,
@@ -377,7 +433,9 @@ export function Dashboard() {
             return
         }
 
-        setCompensationToDelete(null)
+        setCompensationToDelete(
+            null,
+        )
     }
 
     async function handleConfirmDeleteCompensation() {
@@ -394,18 +452,7 @@ export function Dashboard() {
                 compensationToDelete.id,
             )
 
-            setCompensationTransactions(
-                (
-                    currentTransactions,
-                ) =>
-                    currentTransactions.filter(
-                        (
-                            currentTransaction,
-                        ) =>
-                            currentTransaction.id !==
-                            compensationToDelete.id,
-                    ),
-            )
+            await loadDashboardData()
 
             setCompensationToDelete(
                 null,
@@ -468,12 +515,7 @@ export function Dashboard() {
                 })
             }
 
-            const updatedWorkdays =
-                await getWorkdays(1)
-
-            setWorkdays(
-                updatedWorkdays,
-            )
+            await loadDashboardData()
         } catch (error) {
             console.error(
                 workdayId
@@ -492,12 +534,7 @@ export function Dashboard() {
                 workdayId,
             )
 
-            const updatedWorkdays =
-                await getWorkdays(1)
-
-            setWorkdays(
-                updatedWorkdays,
-            )
+            await loadDashboardData()
         } catch (error) {
             console.error(
                 'Erro ao excluir jornada:',
