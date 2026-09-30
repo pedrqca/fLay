@@ -1,6 +1,15 @@
 import Fastify from 'fastify'
+import cors from '@fastify/cors'
 
 const app = Fastify({ logger: true })
+
+const frontendUrl =
+    process.env.FRONTEND_URL ??
+    'http://localhost:5173'
+
+await app.register(cors, {
+    origin: frontendUrl,
+})
 
 app.get('/', async () => {
     return {
