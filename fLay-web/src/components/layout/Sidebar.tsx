@@ -1,9 +1,7 @@
 import {
     FileImage,
     LayoutDashboard,
-    Clock3,
     Menu,
-    Settings,
     X,
 } from 'lucide-react'
 
@@ -25,16 +23,6 @@ const menuItems = [
         label: 'Comprovantes',
         icon: FileImage,
         path: '/comprovantes',
-    },
-    {
-        label: 'Banco de horas',
-        icon: Clock3,
-        path: '/banco',
-    },
-    {
-        label: 'Configurações',
-        icon: Settings,
-        path: '/configuracoes',
     },
 ]
 

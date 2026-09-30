@@ -135,15 +135,6 @@ function normalizeTime(
     return null
 }
 
-function isValidTime(
-    value: string,
-): boolean {
-    const normalized =
-        normalizeTime(value)
-
-    return normalized !== null
-}
-
 export function TimePicker({
     value,
     onChange,

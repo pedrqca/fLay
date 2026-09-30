@@ -30,7 +30,9 @@ export interface UpdateWorkdayData {
     }[]
 }
 
-const API_URL = 'http://localhost:3333'
+const API_URL =
+    import.meta.env.VITE_API_URL ??
+    'http://localhost:3333'
 
 export async function getWorkdays(
     userId: number,

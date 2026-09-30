@@ -8,8 +8,6 @@ import { Sidebar } from './components/layout/Sidebar'
 
 import { Dashboard } from './pages/Dashboard'
 import { Proofs } from './pages/Proofs'
-import { Bank } from './pages/Bank'
-import { Settings } from './pages/Settings'
 
 function App() {
   return (
@@ -26,16 +24,6 @@ function App() {
           <Route
             path="/comprovantes"
             element={<Proofs />}
-          />
-
-          <Route
-            path="/banco"
-            element={<Bank />}
-          />
-
-          <Route
-            path="/configuracoes"
-            element={<Settings />}
           />
         </Routes>
       </div>
