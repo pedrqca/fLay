@@ -43,17 +43,19 @@ export function BankHistory({
                     return (
                         <article
                             key={`${transaction.date}-${transaction.type}-${transaction.minutes}`}
-                            className={`flex items-center justify-between gap-4 border-b px-4 py-4 last:border-b-0 sm:px-6 sm:py-5 ${isExtra
+                            className={`flex items-center justify-between gap-4 border-b px-4 py-4 last:border-b-0 sm:px-6 sm:py-5 ${
+                                isExtra
                                     ? 'border-[#A3B18A]/20 bg-white'
                                     : 'border-[#D8CFBF] bg-[#F1EDE4]'
-                                }`}
+                            }`}
                         >
                             <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                                 <div
-                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${isExtra
+                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${
+                                        isExtra
                                             ? 'bg-[#A3B18A]/20 text-[#588157]'
                                             : 'bg-[#DED5C5] text-[#6B5E4A]'
-                                        }`}
+                                    }`}
                                 >
                                     {isExtra ? (
                                         <ArrowUpRight
@@ -68,10 +70,11 @@ export function BankHistory({
 
                                 <div className="min-w-0">
                                     <p
-                                        className={`truncate text-sm font-semibold ${isExtra
+                                        className={`truncate text-sm font-semibold ${
+                                            isExtra
                                                 ? 'text-[#2F4A33]'
                                                 : 'text-[#5C5040]'
-                                            }`}
+                                        }`}
                                     >
                                         {
                                             transaction.description
@@ -79,10 +82,11 @@ export function BankHistory({
                                     </p>
 
                                     <p
-                                        className={`mt-1 text-sm ${isExtra
+                                        className={`mt-1 text-sm ${
+                                            isExtra
                                                 ? 'text-[#588157]'
                                                 : 'text-[#7A6F5D]'
-                                            }`}
+                                        }`}
                                     >
                                         {formatDateForDisplay(
                                             transaction.date,
@@ -92,10 +96,11 @@ export function BankHistory({
                             </div>
 
                             <p
-                                className={`shrink-0 text-sm font-semibold ${isExtra
+                                className={`shrink-0 text-sm font-semibold ${
+                                    isExtra
                                         ? 'text-[#588157]'
                                         : 'text-[#6B5E4A]'
-                                    }`}
+                                }`}
                             >
                                 {isExtra
                                     ? '+'
