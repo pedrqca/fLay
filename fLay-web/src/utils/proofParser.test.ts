@@ -58,4 +58,19 @@ describe('parseProof', () => {
             'Não foi possível encontrar DATA e HORA',
         )
     })
+    it('deve extrair data e hora do comprovante real', () => {
+        const proof = `
+        COMPROVANTE DE REGISTRO DE PONTO DO TRABALHADOR
+            EMPREGADOR: HOSPITAL
+            NOME: Layane
+            DATA: 29/09/2026 HORA: 18:42
+    `
+
+        const result = parseProof(proof)
+
+        expect(result).toEqual({
+            date: '2026-09-29',
+            time: '18:42',
+        })
+    })
 })
