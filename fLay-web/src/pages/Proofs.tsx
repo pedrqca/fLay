@@ -138,7 +138,7 @@ function formatDate(
         day,
     ] = dateOnly.split('-')
 
-    return `${day}/${month}/${year}`
+    return `${day} /${month}/${year} `
 }
 
 function getDateOnly(
@@ -162,16 +162,18 @@ function formatMinutes(
         absoluteMinutes % 60
 
     return `${hours
-        .toString()
-        .padStart(
-            2,
-            '0',
-        )}h ${remainingMinutes
             .toString()
             .padStart(
                 2,
                 '0',
-            )}min`
+            )
+        }h ${remainingMinutes
+            .toString()
+            .padStart(
+                2,
+                '0',
+            )
+        } min`
 }
 
 function calculateWorkdayMinutes(
@@ -267,7 +269,7 @@ function buildProofList(
                     )
 
                 return {
-                    id: `workday-${workday.id}`,
+                    id: `workday - ${workday.id} `,
                     date,
                     type: 'WORKDAY' as const,
 
@@ -310,7 +312,7 @@ function buildProofList(
                 (
                     transaction,
                 ) => ({
-                    id: `compensation-${transaction.id}`,
+                    id: `compensation - ${transaction.id} `,
 
                     date: getDateOnly(
                         transaction.date,
@@ -354,16 +356,12 @@ export function Proofs() {
     const [
         workdays,
         setWorkdays,
-    ] = useState<Workday[]>(
-        [],
-    )
+    ] = useState<Workday[]>([])
 
     const [
         transactions,
         setTransactions,
-    ] = useState<
-        BankTransaction[]
-    >([])
+    ] = useState<BankTransaction[]>([])
 
     const [
         isLoading,
@@ -395,9 +393,7 @@ export function Proofs() {
     const [
         editingWorkdayId,
         setEditingWorkdayId,
-    ] = useState<
-        number | null
-    >(null)
+    ] = useState<number | null>(null)
 
     const [
         editingCompensation,
@@ -409,9 +405,7 @@ export function Proofs() {
     const [
         workdayToDelete,
         setWorkdayToDelete,
-    ] = useState<
-        Workday | null
-    >(null)
+    ] = useState<Workday | null>(null)
 
     const [
         isDeletingWorkday,
@@ -483,12 +477,8 @@ export function Proofs() {
     // ==========================================
 
     function openCreateProofModal() {
-        setEditingProof(
-            undefined,
-        )
-
+        setEditingProof(undefined)
         setEditingWorkdayId(null)
-
         setIsProofModalOpen(true)
     }
 
@@ -531,11 +521,7 @@ export function Proofs() {
         }
 
         setIsProofModalOpen(false)
-
-        setEditingProof(
-            undefined,
-        )
-
+        setEditingProof(undefined)
         setEditingWorkdayId(null)
     }
 
@@ -578,14 +564,8 @@ export function Proofs() {
                 })
             }
 
-            setIsProofModalOpen(
-                false,
-            )
-
-            setEditingProof(
-                undefined,
-            )
-
+            setIsProofModalOpen(false)
+            setEditingProof(undefined)
             setEditingWorkdayId(null)
 
             await loadData()
@@ -612,6 +592,13 @@ export function Proofs() {
     function handleDeleteProof(
         workdayId: number,
     ) {
+        console.log(
+            '[DELETE] Clique em excluir jornada',
+            {
+                workdayId,
+            },
+        )
+
         const workday =
             workdays.find(
                 (item) =>
@@ -620,16 +607,37 @@ export function Proofs() {
             )
 
         if (!workday) {
+            console.log(
+                '[DELETE] Jornada não encontrada no estado',
+            )
+
             return
         }
+
+        console.log(
+            '[DELETE] Jornada encontrada',
+            workday,
+        )
 
         setWorkdayToDelete(
             workday,
         )
+
+        console.log(
+            '[DELETE] Modal de confirmação solicitado',
+        )
     }
 
     function handleCloseDeleteWorkday() {
+        console.log(
+            '[DELETE] Fechando modal de exclusão da jornada',
+        )
+
         if (isDeletingWorkday) {
+            console.log(
+                '[DELETE] Exclusão em andamento, fechamento bloqueado',
+            )
+
             return
         }
 
@@ -637,25 +645,65 @@ export function Proofs() {
     }
 
     async function handleConfirmDeleteWorkday() {
+        console.log(
+            '[DELETE] Clique em CONFIRMAR exclusão da jornada',
+            {
+                workdayToDelete,
+            },
+        )
+
         if (!workdayToDelete) {
+            console.log(
+                '[DELETE] Nenhuma jornada selecionada para exclusão',
+            )
+
             return
         }
 
         try {
-            setIsDeletingWorkday(
-                true,
+            console.log(
+                '[DELETE] Iniciando exclusão da jornada',
+                {
+                    id: workdayToDelete.id,
+                },
             )
 
+            setIsDeletingWorkday(true)
             setErrorMessage('')
+
+            console.log(
+                '[DELETE] Chamando deleteWorkday()',
+            )
 
             await deleteWorkday(
                 workdayToDelete.id,
             )
 
+            console.log(
+                '[DELETE] deleteWorkday() concluído',
+            )
+
+            console.log(
+                '[DELETE] Recarregando dados',
+            )
+
             await loadData()
 
+            console.log(
+                '[DELETE] Dados recarregados',
+            )
+
             setWorkdayToDelete(null)
+
+            console.log(
+                '[DELETE] Jornada excluída com sucesso',
+            )
         } catch (error) {
+            console.error(
+                '[DELETE] Erro ao excluir jornada',
+                error,
+            )
+
             if (
                 error instanceof Error
             ) {
@@ -668,9 +716,11 @@ export function Proofs() {
                 )
             }
         } finally {
-            setIsDeletingWorkday(
-                false,
+            console.log(
+                '[DELETE] Finalizando processo de exclusão',
             )
+
+            setIsDeletingWorkday(false)
         }
     }
 
@@ -679,13 +729,8 @@ export function Proofs() {
     // ==========================================
 
     function openCreateCompensationModal() {
-        setEditingCompensation(
-            null,
-        )
-
-        setIsCompensationModalOpen(
-            true,
-        )
+        setEditingCompensation(null)
+        setIsCompensationModalOpen(true)
     }
 
     function openEditCompensationModal(
@@ -716,9 +761,7 @@ export function Proofs() {
                 transaction.description,
         })
 
-        setIsCompensationModalOpen(
-            true,
-        )
+        setIsCompensationModalOpen(true)
     }
 
     function closeCompensationModal() {
@@ -726,13 +769,8 @@ export function Proofs() {
             return
         }
 
-        setIsCompensationModalOpen(
-            false,
-        )
-
-        setEditingCompensation(
-            null,
-        )
+        setIsCompensationModalOpen(false)
+        setEditingCompensation(null)
     }
 
     async function handleSubmitCompensation(
@@ -799,13 +837,8 @@ export function Proofs() {
                 )
             }
 
-            setIsCompensationModalOpen(
-                false,
-            )
-
-            setEditingCompensation(
-                null,
-            )
+            setIsCompensationModalOpen(false)
+            setEditingCompensation(null)
 
             await loadData()
         } catch (error) {
@@ -866,10 +899,7 @@ export function Proofs() {
         }
 
         try {
-            setIsDeletingCompensation(
-                true,
-            )
-
+            setIsDeletingCompensation(true)
             setErrorMessage('')
 
             await deleteBankTransaction(
@@ -878,9 +908,7 @@ export function Proofs() {
 
             await loadData()
 
-            setCompensationToDelete(
-                null,
-            )
+            setCompensationToDelete(null)
         } catch (error) {
             if (
                 error instanceof Error
@@ -894,9 +922,7 @@ export function Proofs() {
                 )
             }
         } finally {
-            setIsDeletingCompensation(
-                false,
-            )
+            setIsDeletingCompensation(false)
         }
     }
 
@@ -979,8 +1005,7 @@ export function Proofs() {
                                     Carregando comprovantes...
                                 </p>
                             </div>
-                        ) : proofItems.length ===
-                            0 ? (
+                        ) : proofItems.length === 0 ? (
                             <div className="rounded-2xl border border-[#A3B18A]/30 bg-white p-10 text-center">
                                 <p className="text-sm font-medium text-[#2F4A33]">
                                     Nenhum comprovante registrado
@@ -1058,7 +1083,7 @@ export function Proofs() {
                                                                                 index,
                                                                             ) => (
                                                                                 <span
-                                                                                    key={`${item.id}-${time}-${index}`}
+                                                                                    key={`${item.id} -${time} -${index} `}
                                                                                     className="rounded-lg bg-[#FAF9F6] px-2.5 py-1.5 text-xs font-medium text-[#2F4A33]"
                                                                                 >
                                                                                     {
@@ -1095,8 +1120,7 @@ export function Proofs() {
                                                                         Horas compensadas
                                                                     </p>
                                                                 </>
-                                                            ) : item.minutes ===
-                                                                0 ? (
+                                                            ) : item.minutes === 0 ? (
                                                                 <>
                                                                     <p className="text-sm font-semibold text-[#588157]">
                                                                         00h
@@ -1110,10 +1134,10 @@ export function Proofs() {
                                                             ) : (
                                                                 <>
                                                                     <p
-                                                                        className={`text-sm font-semibold ${isPositive
-                                                                            ? 'text-[#588157]'
-                                                                            : 'text-[#B45353]'
-                                                                            }`}
+                                                                        className={`text - sm font - semibold ${isPositive
+                                                                                ? 'text-[#588157]'
+                                                                                : 'text-[#B45353]'
+                                                                            } `}
                                                                     >
                                                                         {isPositive
                                                                             ? '+'
@@ -1182,11 +1206,29 @@ export function Proofs() {
                                                                     isDeletingCompensation
                                                                 }
                                                                 onClick={() => {
+                                                                    console.log(
+                                                                        '[DELETE] Botão Excluir pressionado',
+                                                                        {
+                                                                            itemId:
+                                                                                item.id,
+                                                                            type:
+                                                                                item.type,
+                                                                            workdayId:
+                                                                                item.workdayId,
+                                                                            transactionId:
+                                                                                item.transactionId,
+                                                                        },
+                                                                    )
+
                                                                     if (
                                                                         isCompensation &&
                                                                         item.transactionId !==
                                                                         undefined
                                                                     ) {
+                                                                        console.log(
+                                                                            '[DELETE] Encaminhando para exclusão de compensação',
+                                                                        )
+
                                                                         handleDeleteCompensation(
                                                                             item.transactionId,
                                                                         )
@@ -1198,10 +1240,20 @@ export function Proofs() {
                                                                         item.workdayId !==
                                                                         undefined
                                                                     ) {
+                                                                        console.log(
+                                                                            '[DELETE] Encaminhando para exclusão de jornada',
+                                                                        )
+
                                                                         handleDeleteProof(
                                                                             item.workdayId,
                                                                         )
+
+                                                                        return
                                                                     }
+
+                                                                    console.log(
+                                                                        '[DELETE] Nenhum workdayId ou transactionId encontrado',
+                                                                    )
                                                                 }}
                                                                 className="flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                                                             >
