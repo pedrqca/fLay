@@ -34,6 +34,7 @@ import {
     createWorkday,
     getWorkdays,
     updateWorkday,
+    deleteWorkday,
     type Workday,
 } from '../api/workdays'
 
@@ -472,13 +473,23 @@ export function Dashboard() {
         }
     }
 
+    async function handleDeleteWorkday(
+        workdayId: number,
+    ) {
+        await deleteWorkday(
+            workdayId,
+        )
+
+        await loadDashboardData()
+    }
+
     async function handleProofSubmit(
         data: ProofData,
         workdayId?: number,
     ) {
         try {
             const date = new Date(
-                `${data.date}T00:00:00`,
+                `${ data.date } T00:00:00`,
             )
 
             const day =
@@ -587,7 +598,7 @@ export function Dashboard() {
 
                     <StatCard
                         title="Dias trabalhados"
-                        value={`${weekResult.days.length} dias`}
+                        value={`${ weekResult.days.length } dias`}
                         description="Esta semana"
                         icon={CalendarDays}
                     />
@@ -612,6 +623,9 @@ export function Dashboard() {
                     }
                     onProofSubmit={
                         handleProofSubmit
+                    }
+                    onDelete={
+                        handleDeleteWorkday
                     }
                 />
 
