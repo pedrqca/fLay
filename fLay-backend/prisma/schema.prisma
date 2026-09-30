@@ -1,6 +1,56 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   createdAt DateTime @default(now())
+
+  workdays         Workday[]
+  bankTransactions BankTransaction[]
+}
+
+model Workday {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  timeEntries TimeEntry[]
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model TimeEntry {
+  id        Int      @id @default(autoincrement())
+  workdayId Int
+  time      String
+  createdAt DateTime @default(now())
+
+  workday Workday @relation(fields: [workdayId], references: [id])
+
+  @@index([workdayId])
+}
+
+model BankTransaction {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  date        DateTime
+  type        String
+  minutes     Int
+  description String
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, date])
 }
