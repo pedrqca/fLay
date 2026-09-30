@@ -1,6 +1,8 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 
+import { prisma } from './lib/prisma.js'
+
 const app = Fastify({ logger: true })
 
 const frontendUrl =
@@ -12,8 +14,11 @@ await app.register(cors, {
 })
 
 app.get('/', async () => {
+    await prisma.$queryRaw`SELECT 1`
+
     return {
         ok: true,
+        database: 'connected',
     }
 })
 
