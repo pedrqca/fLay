@@ -18,6 +18,7 @@ lerna-debug.log*
 .env
 .env.*
 !.env.example
+.env.neon
 
 # Local configuration
 *.local
