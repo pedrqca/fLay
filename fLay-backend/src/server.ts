@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 
 import { prisma } from './lib/prisma.js'
+import { userRoutes } from './routes/users.js'
 
 const app = Fastify({ logger: true })
 
@@ -21,6 +22,8 @@ app.get('/', async () => {
         database: 'connected',
     }
 })
+
+await app.register(userRoutes)
 
 const start = async () => {
     try {
