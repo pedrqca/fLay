@@ -10,8 +10,12 @@ const app = Fastify({
     logger: true,
 })
 
+const frontendUrl =
+    process.env.FRONTEND_URL ??
+    'http://localhost:5173'
+
 await app.register(cors, {
-    origin: 'http://localhost:5173',
+    origin: frontendUrl,
     methods: [
         'GET',
         'POST',
@@ -33,7 +37,4 @@ app.get('/', async () => {
     }
 })
 
-app.listen({
-    port: 3333,
-    host: '0.0.0.0',
-})
+export default app
