@@ -21,9 +21,10 @@ export interface ProofData {
 interface ProofModalProps {
     isOpen: boolean
     onClose: () => void
+    // 1. ATUALIZADO: Agora aceita uma função assíncrona
     onSubmit: (
         data: ProofData,
-    ) => void
+    ) => void | Promise<void>
     initialData?: ProofData
 }
 
@@ -114,6 +115,12 @@ export function ProofModal({
         setError,
     ] = useState('')
 
+    // 2. NOVO ESTADO: Controla o carregamento
+    const [
+        isSubmitting,
+        setIsSubmitting,
+    ] = useState(false)
+
     useEffect(() => {
         if (!isOpen) {
             return
@@ -136,6 +143,7 @@ export function ProofModal({
         }
 
         setError('')
+        setIsSubmitting(false) // Reseta o loading ao abrir
     }, [
         isOpen,
         initialData,
@@ -209,7 +217,8 @@ export function ProofModal({
         setError('')
     }
 
-    function handleSubmit(
+    // 3. ATUALIZADO: Função agora é async e usa o isSubmitting
+    async function handleSubmit(
         event: React.FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
@@ -254,13 +263,17 @@ export function ProofModal({
             times: [...form.times],
         }
 
-        console.log(
-            'Data enviada pelo ProofModal:',
-            data,
-        )
-
         setError('')
-        onSubmit(data)
+        setIsSubmitting(true) // Ativa o loading
+
+        try {
+            await onSubmit(data) // Espera a resposta do banco
+        } catch (err) {
+            console.error('Erro ao salvar jornada:', err)
+            setError('Ocorreu um erro ao salvar. Tente novamente.')
+        } finally {
+            setIsSubmitting(false) // Remove o loading
+        }
     }
 
     function getTimeLabel(
@@ -286,6 +299,9 @@ export function ProofModal({
         <div
             className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#2F4A33]/30 px-4 py-6 backdrop-blur-sm sm:px-6"
             onMouseDown={(event) => {
+                // Impede fechar clicando fora se estiver carregando
+                if (isSubmitting) return
+
                 if (
                     event.target ===
                     event.currentTarget
@@ -314,7 +330,8 @@ export function ProofModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
+                        disabled={isSubmitting} // Desabilita o X no loading
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Fechar"
                     >
                         <X size={20} />
@@ -414,12 +431,13 @@ export function ProofModal({
                                             2 && (
                                                 <button
                                                     type="button"
+                                                    disabled={isSubmitting} // Desabilita no loading
                                                     onClick={() =>
                                                         handleRemoveTime(
                                                             index,
                                                         )
                                                     }
-                                                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#A3B18A]/40 text-[#A3B18A] transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                                                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#A3B18A]/40 text-[#A3B18A] transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-[#A3B18A]/40 disabled:hover:text-[#A3B18A]"
                                                     aria-label={`Remover ${getTimeLabel(index).toLowerCase()}`}
                                                 >
                                                     <Trash2
@@ -437,10 +455,11 @@ export function ProofModal({
                         {/* ADICIONAR HORÁRIO */}
                         <button
                             type="button"
+                            disabled={isSubmitting} // Desabilita no loading
                             onClick={
                                 handleAddTime
                             }
-                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#A3B18A]/50 bg-white px-4 py-3 text-sm font-medium text-[#588157] transition-colors hover:border-[#588157] hover:bg-[#DAD7CD]"
+                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#A3B18A]/50 bg-white px-4 py-3 text-sm font-medium text-[#588157] transition-colors hover:border-[#588157] hover:bg-[#DAD7CD] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Plus size={18} />
 
@@ -486,7 +505,8 @@ export function ProofModal({
                             onClick={
                                 onClose
                             }
-                            className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] sm:w-auto"
+                            disabled={isSubmitting} // Desabilita no loading
+                            className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
                         >
                             Cancelar
                         </button>
@@ -494,6 +514,7 @@ export function ProofModal({
                         <button
                             type="submit"
                             disabled={
+                                isSubmitting || // 4. Adicionado validação de loading
                                 !form.date ||
                                 form.times.some(
                                     (
@@ -506,11 +527,13 @@ export function ProofModal({
                                 2 !==
                                 0
                             }
-                            className="w-full rounded-xl bg-[#588157] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                            className="w-full rounded-xl bg-[#588157] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
-                            {isEditing
-                                ? 'Salvar alterações'
-                                : 'Registrar jornada'}
+                            {/* 5. Muda o texto de acordo com o status e edição */}
+                            {isSubmitting
+                                ? (isEditing ? 'Salvando...' : 'Registrando...')
+                                : (isEditing ? 'Salvar alterações' : 'Registrar jornada')
+                            }
                         </button>
                     </div>
                 </form>

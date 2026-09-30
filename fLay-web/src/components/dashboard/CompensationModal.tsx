@@ -20,7 +20,9 @@ export interface CompensationToEdit {
 interface CompensationModalProps {
     isOpen: boolean
     onClose: () => void
-    onSubmit: (data: CompensationData) => void
+    onSubmit: (
+        data: CompensationData,
+    ) => Promise<void>
     editingTransaction?: CompensationToEdit | null
 }
 
@@ -43,10 +45,12 @@ function formatMinutesToHours(
         minutes % 60
 
     return `${hours
-        .toString()
-        .padStart(2, '0')}:${remainingMinutes
             .toString()
-            .padStart(2, '0')}`
+            .padStart(2, '0')
+        }:${remainingMinutes
+            .toString()
+            .padStart(2, '0')
+        } `
 }
 
 export function CompensationModal({
@@ -69,6 +73,11 @@ export function CompensationModal({
         description,
         setDescription,
     ] = useState('')
+
+    const [
+        isSubmitting,
+        setIsSubmitting,
+    ] = useState(false)
 
     const isEditing =
         editingTransaction !== null
@@ -110,16 +119,34 @@ export function CompensationModal({
         return null
     }
 
-    function handleSubmit(
+    async function handleSubmit(
         event: React.FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
 
-        onSubmit({
-            date,
-            hours,
-            description,
-        })
+        if (isSubmitting) {
+            return
+        }
+
+        try {
+            setIsSubmitting(true)
+
+            await onSubmit({
+                date,
+                hours,
+                description,
+            })
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    function handleClose() {
+        if (isSubmitting) {
+            return
+        }
+
+        onClose()
     }
 
     return (
@@ -142,8 +169,9 @@ export function CompensationModal({
 
                     <button
                         type="button"
-                        onClick={onClose}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
+                        onClick={handleClose}
+                        disabled={isSubmitting}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label="Fechar"
                     >
                         <X size={20} />
@@ -200,25 +228,30 @@ export function CompensationModal({
                             placeholder="Ex.: Folga de sábado"
                             className="w-full rounded-xl border border-[#A3B18A]/40 bg-[#FAF9F6] px-4 py-3 text-sm text-[#2F4A33] outline-none placeholder:text-[#A3B18A] transition-colors focus:border-[#588157]"
                             required
+                            disabled={isSubmitting}
                         />
                     </div>
 
                     <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end sm:gap-3">
                         <button
                             type="button"
-                            onClick={onClose}
-                            className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] sm:w-auto"
+                            onClick={handleClose}
+                            disabled={isSubmitting}
+                            className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                         >
                             Cancelar
                         </button>
 
                         <button
                             type="submit"
-                            className="w-full rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] sm:w-auto"
+                            disabled={isSubmitting}
+                            className="w-full rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                         >
-                            {isEditing
-                                ? 'Salvar alterações'
-                                : 'Registrar compensação'}
+                            {isSubmitting
+                                ? 'Salvando...'
+                                : isEditing
+                                    ? 'Salvar alterações'
+                                    : 'Registrar compensação'}
                         </button>
                     </div>
                 </form>

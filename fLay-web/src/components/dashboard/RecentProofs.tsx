@@ -4,7 +4,6 @@ import {
     Plus,
     Trash2,
     Upload,
-    X,
 } from 'lucide-react'
 
 import {
@@ -16,6 +15,8 @@ import {
     type CompensationData,
     type CompensationToEdit,
 } from './CompensationModal'
+
+import { CardWarning } from '../ui/CardWarning' // Caminho corrigido para a pasta ui
 
 import {
     ProofModal,
@@ -33,20 +34,21 @@ interface RecentProofsProps {
 
     isCompensationModalOpen: boolean
 
-    onOpenCompensation: () => void
+    onOpenCompensation: () => void | Promise<void>
 
     onCloseCompensation: () => void
 
     onCompensationSubmit: (
         data: CompensationData,
-    ) => void
+    ) => Promise<void>
 
     editingCompensation?: CompensationToEdit | null
 
+    // ATUALIZADO: Agora aceita função assíncrona (Promise)
     onProofSubmit?: (
         data: ProofData,
         workdayId?: number,
-    ) => void
+    ) => void | Promise<void>
 
     onDelete?: (
         workdayId: number,
@@ -83,6 +85,23 @@ export function RecentProofs({
         setWorkdayToDelete,
     ] = useState<Proof | null>(null)
 
+    const [
+        isOpeningCompensation,
+        setIsOpeningCompensation,
+    ] = useState(false)
+
+    async function handleOpenCompensationClick() {
+        setIsOpeningCompensation(true)
+
+        try {
+            await onOpenCompensation()
+        } catch (error) {
+            console.error('Erro ao abrir compensação:', error)
+        } finally {
+            setIsOpeningCompensation(false)
+        }
+    }
+
     function handleOpenCreateModal() {
         setProofToEdit(null)
         setIsProofModalOpen(true)
@@ -100,7 +119,8 @@ export function RecentProofs({
         setProofToEdit(null)
     }
 
-    function handleProofSubmit(
+
+    async function handleProofSubmit(
         data: ProofData,
     ) {
         console.log(
@@ -110,12 +130,17 @@ export function RecentProofs({
             data,
         )
 
-        onProofSubmit?.(
-            data,
-            proofToEdit?.id,
-        )
-
-        handleCloseProofModal()
+        try {
+            await onProofSubmit?.(
+                data,
+                proofToEdit?.id,
+            )
+        } catch (error) {
+            console.error('Erro ao salvar:', error)
+        } finally {
+            // Só fecha o modal depois que o backend responder
+            handleCloseProofModal()
+        }
     }
 
     function handleDeleteClick(
@@ -235,21 +260,18 @@ export function RecentProofs({
                     <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto md:items-center">
                         <button
                             type="button"
-                            onClick={
-                                onOpenCompensation
-                            }
-                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#A3B18A]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] sm:w-auto"
+                            onClick={handleOpenCompensationClick}
+                            disabled={isOpeningCompensation}
+                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#A3B18A]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
                             <Plus size={17} />
 
-                            Registrar compensação
+                            {isOpeningCompensation ? 'Processando...' : 'Registrar compensação'}
                         </button>
 
                         <button
                             type="button"
-                            onClick={
-                                handleOpenCreateModal
-                            }
+                            onClick={handleOpenCreateModal}
                             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] sm:w-auto"
                         >
                             <Upload size={17} />
@@ -385,108 +407,20 @@ export function RecentProofs({
                 }
             />
 
-            {/* MODAL DE EXCLUSÃO */}
-            {workdayToDelete && (
-                <div
-                    className="fixed inset-0 z-[70] flex items-center justify-center bg-[#2F4A33]/30 px-4 py-6 backdrop-blur-sm"
-                    onMouseDown={(
-                        event,
-                    ) => {
-                        if (
-                            event.target ===
-                            event.currentTarget
-                        ) {
-                            handleCloseDeleteModal()
-                        }
-                    }}
-                >
-                    <div className="w-full max-w-md overflow-hidden rounded-2xl bg-[#FAF9F6] shadow-2xl">
-                        <div className="px-5 pb-5 pt-6 sm:px-6 sm:pt-7">
-                            <div className="flex items-start gap-4">
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500">
-                                    <Trash2
-                                        size={21}
-                                    />
-                                </div>
-
-                                <div className="min-w-0">
-                                    <h3 className="text-lg font-semibold text-[#2F4A33]">
-                                        Excluir jornada?
-                                    </h3>
-
-                                    <p className="mt-1.5 text-sm leading-5 text-[#588157]">
-                                        Você está prestes a excluir a jornada de{' '}
-                                        <span className="font-semibold text-[#2F4A33]">
-                                            {
-                                                workdayToDelete.date
-                                            }
-                                        </span>
-                                        .
-                                    </p>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        handleCloseDeleteModal
-                                    }
-                                    disabled={
-                                        deletingId !==
-                                        null
-                                    }
-                                    className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Fechar"
-                                >
-                                    <X size={18} />
-                                </button>
-                            </div>
-
-                            <div className="mt-5 rounded-xl border border-red-100 bg-red-50/70 px-4 py-3.5">
-                                <p className="text-sm leading-5 text-red-700">
-                                    Essa ação removerá os registros de horário e o lançamento correspondente no banco de horas. Essa operação não pode ser desfeita.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col-reverse gap-2 border-t border-[#A3B18A]/20 bg-white/60 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
-                            <button
-                                type="button"
-                                onClick={
-                                    handleCloseDeleteModal
-                                }
-                                disabled={
-                                    deletingId !==
-                                    null
-                                }
-                                className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                            >
-                                Cancelar
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={
-                                    handleConfirmDelete
-                                }
-                                disabled={
-                                    deletingId !==
-                                    null
-                                }
-                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                            >
-                                <Trash2
-                                    size={16}
-                                />
-
-                                {deletingId !==
-                                    null
-                                    ? 'Excluindo...'
-                                    : 'Excluir jornada'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* MODAL DE EXCLUSÃO REFATORADO */}
+            <CardWarning
+                isOpen={workdayToDelete !== null}
+                title="Excluir jornada?"
+                description="Você está prestes a excluir esta jornada."
+                itemTitle={workdayToDelete ? `Jornada de: ${workdayToDelete.date}` : undefined}
+                warning="Essa ação removerá os registros de horário e o lançamento correspondente no banco de horas. Essa operação não pode ser desfeita."
+                confirmLabel="Excluir jornada"
+                cancelLabel="Cancelar"
+                isLoading={deletingId !== null}
+                loadingLabel="Excluindo..."
+                onClose={handleCloseDeleteModal}
+                onConfirm={handleConfirmDelete}
+            />
         </>
     )
 }
