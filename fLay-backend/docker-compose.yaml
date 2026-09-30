@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: flay-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: flay
+      POSTGRES_PASSWORD: flay
+      POSTGRES_DB: flay
+    ports:
+      - "5433:5432"
+    volumes:
+      - flay-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  flay-postgres-data:
