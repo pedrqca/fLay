@@ -1,5 +1,6 @@
 import {
     FileImage,
+    History,
     LayoutDashboard,
     Menu,
     X,
@@ -23,6 +24,11 @@ const menuItems = [
         label: 'Comprovantes',
         icon: FileImage,
         path: '/comprovantes',
+    },
+    {
+        label: 'Histórico Semanal',
+        icon: History,
+        path: '/historico',
     },
 ]
 

@@ -44,10 +44,16 @@ export function useDashboard() {
         setError,
     ] = useState<string | null>(null)
 
+    const [
+        isLoading,
+        setIsLoading,
+    ] = useState(true)
+
     const loadDashboardData =
         useCallback(
             async () => {
                 try {
+                    setIsLoading(true)
                     setError(null)
 
                     const [
@@ -71,6 +77,8 @@ export function useDashboard() {
                     )
 
                     throw loadError
+                } finally {
+                    setIsLoading(false)
                 }
             },
             [userId],
@@ -93,6 +101,7 @@ export function useDashboard() {
         workdays,
         bankTransactions,
         error,
+        isLoading,
         loadDashboardData,
     }
 }

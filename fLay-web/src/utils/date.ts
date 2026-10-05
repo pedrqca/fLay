@@ -31,16 +31,36 @@ export function formatDateKey(date: Date): string {
     return `${year}-${month}-${day}`
 }
 
+export function getWeekStart(date: Date): Date {
+    const weekStart = new Date(date)
+    const dayOfWeek = weekStart.getUTCDay()
+    const daysFromMonday =
+        dayOfWeek === 0
+            ? -6
+            : 1 - dayOfWeek
+
+    weekStart.setUTCDate(
+        weekStart.getUTCDate() +
+        daysFromMonday,
+    )
+
+    return weekStart
+}
+
+export function getWeekEnd(date: Date): Date {
+    const weekEnd = getWeekStart(date)
+
+    weekEnd.setUTCDate(
+        weekEnd.getUTCDate() + 6,
+    )
+
+    return weekEnd
+}
+
 export function getCurrentWeekRange() {
     const today = new Date()
-    const currentDay = today.getDay()
 
-    const daysFromMonday =
-        currentDay === 0
-            ? -6
-            : 1 - currentDay
-
-    const startOfWeek = new Date(
+    const todayAsCivilDate = new Date(
         Date.UTC(
             today.getFullYear(),
             today.getMonth(),
@@ -51,18 +71,10 @@ export function getCurrentWeekRange() {
         ),
     )
 
-    startOfWeek.setUTCDate(
-        startOfWeek.getUTCDate() +
-        daysFromMonday,
-    )
-
-    const endOfWeek = new Date(
-        startOfWeek,
-    )
-
-    endOfWeek.setUTCDate(
-        startOfWeek.getUTCDate() + 6,
-    )
+    const startOfWeek =
+        getWeekStart(todayAsCivilDate)
+    const endOfWeek =
+        getWeekEnd(todayAsCivilDate)
 
     return {
         start: formatDateKey(
