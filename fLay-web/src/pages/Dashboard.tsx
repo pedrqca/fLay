@@ -24,17 +24,16 @@ import {
     mapWorkdaysToProofs,
 } from '../utils/workdayMapper'
 
-import { useDashboard } from '../hooks/useDashboard'
+import type { DashboardData } from '../hooks/useDashboard'
 import { useCompensation } from '../hooks/useCompensation'
 import { useWorkday } from '../hooks/useWorkday'
 
-export function Dashboard() {
-    const {
-        workdays,
-        bankTransactions: bankTransactionsFromApi,
-        error,
-        loadDashboardData,
-    } = useDashboard()
+export function Dashboard({
+    workdays,
+    bankTransactions: bankTransactionsFromApi,
+    error,
+    loadDashboardData,
+}: DashboardData) {
 
     const [
         isCompensationModalOpen,

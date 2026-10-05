@@ -8,8 +8,7 @@ import {
     useMemo,
 } from 'react'
 
-import { useAuth } from '../hooks/useAuth'
-import { useDashboard } from '../hooks/useDashboard'
+import type { DashboardData } from '../hooks/useDashboard'
 import {
     formatDate,
 } from '../utils/date'
@@ -21,16 +20,12 @@ import {
     formatMinutesLong,
 } from '../utils/time'
 
-export function WeeklyHistory() {
-    const {
-        userId,
-    } = useAuth()
-    const {
-        workdays,
-        bankTransactions,
-        error,
-        isLoading,
-    } = useDashboard()
+export function WeeklyHistory({
+    workdays,
+    bankTransactions,
+    error,
+    isLoading,
+}: DashboardData) {
 
     const weeklyHistory = useMemo(
         () =>
@@ -38,11 +33,10 @@ export function WeeklyHistory() {
                 workdays,
                 bankTransactions,
             ),
-        [
-            workdays,
-            bankTransactions,
-            userId,
-        ],
+            [
+                workdays,
+                bankTransactions,
+            ],
     )
 
     return (

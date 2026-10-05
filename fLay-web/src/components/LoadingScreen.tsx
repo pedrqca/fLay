@@ -1,58 +1,135 @@
 import { Hourglass } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import {
+    useEffect,
+    useRef,
+    useState,
+} from 'react'
 
-export function LoadingScreen() {
-    // Estado para controlar a animação de saída (fade out)
-    const [isFadingOut, setIsFadingOut] = useState(false)
-    // Estado para remover completamente do DOM
-    const [isUnmounted, setIsUnmounted] = useState(false)
+interface LoadingScreenProps {
+    isLoading: boolean
+    minimumDuration?: number
+    fadeDuration?: number
+}
+
+export function LoadingScreen({
+    isLoading,
+    minimumDuration = 800,
+    fadeDuration = 300,
+}: LoadingScreenProps) {
+    const [
+        isFadingOut,
+        setIsFadingOut,
+    ] = useState(false)
+    const [
+        isUnmounted,
+        setIsUnmounted,
+    ] = useState(false)
+    const startedAtRef =
+        useRef<number | null>(null)
+    const fadeTimerRef =
+        useRef<number | null>(null)
+    const unmountTimerRef =
+        useRef<number | null>(null)
 
     useEffect(() => {
-        // Verifica no sessionStorage se já carregou antes nesta sessão
-        const hasLoadedBefore = sessionStorage.getItem('hasLoadedBefore')
+        if (fadeTimerRef.current !== null) {
+            window.clearTimeout(
+                fadeTimerRef.current,
+            )
+        }
 
-        if (hasLoadedBefore) {
-            // Se já carregou, não mostra nada
-            setIsUnmounted(true)
+        if (unmountTimerRef.current !== null) {
+            window.clearTimeout(
+                unmountTimerRef.current,
+            )
+        }
+
+        if (isLoading) {
+            if (startedAtRef.current === null) {
+                startedAtRef.current =
+                    Date.now()
+            }
+
+            setIsFadingOut(false)
+            setIsUnmounted(false)
             return
         }
 
-        // Se é a primeira vez, marca no sessionStorage e inicia o timer
-        sessionStorage.setItem('hasLoadedBefore', 'true')
+        if (startedAtRef.current === null) {
+            startedAtRef.current =
+                Date.now()
+        }
 
-        // Tempo que a tela vai ficar visível (ex: 2 segundos)
-        const timer = setTimeout(() => {
-            setIsFadingOut(true) // Começa a sumir
+        const elapsed =
+            Date.now() -
+            startedAtRef.current
+        const remaining =
+            Math.max(
+                0,
+                minimumDuration -
+                    elapsed,
+            )
 
-            // Espera a animação de sumir terminar (300ms) para remover do DOM
-            setTimeout(() => {
-                setIsUnmounted(true)
-            }, 300)
+        fadeTimerRef.current =
+            window.setTimeout(() => {
+                setIsFadingOut(true)
 
-        }, 2000) // Ajuste este tempo como preferir (2000ms = 2s)
+                unmountTimerRef.current =
+                    window.setTimeout(() => {
+                        setIsUnmounted(true)
+                        startedAtRef.current =
+                            null
+                    }, fadeDuration)
+            }, remaining)
 
-        return () => clearTimeout(timer)
-    }, [])
+        return () => {
+            if (fadeTimerRef.current !== null) {
+                window.clearTimeout(
+                    fadeTimerRef.current,
+                )
+            }
 
-    if (isUnmounted) return null
+            if (unmountTimerRef.current !== null) {
+                window.clearTimeout(
+                    unmountTimerRef.current,
+                )
+            }
+        }
+    }, [
+        fadeDuration,
+        isLoading,
+        minimumDuration,
+    ])
+
+    if (isUnmounted) {
+        return null
+    }
 
     return (
         <div
-            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#FAF9F6] transition-opacity duration-300 ${isFadingOut ? 'opacity-0' : 'opacity-100'
+            role="status"
+            aria-live="polite"
+            aria-label="Carregando aplicação"
+            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#FAF9F6] transition-opacity ${isFadingOut ? 'opacity-0' : 'opacity-100'
                 }`}
+            style={{
+                transitionDuration: `${ fadeDuration }ms`,
+            }}
         >
-            {/* O ícone da Ampulheta com animação de pulso e rotação */}
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-[#A3B18A]/20">
+            <div
+                aria-hidden="true"
+                className="relative flex h-24 w-24 items-center justify-center rounded-full bg-[#A3B18A]/20"
+            >
                 <Hourglass
                     size={40}
-                    className="animate-pulse text-[#2F4A33] transition-all duration-1000"
-                // Se quiser que ela fique girando, pode adicionar a classe 'animate-spin'
+                    className="animate-pulse text-[#2F4A33]"
                 />
             </div>
 
-            <h1 className="mt-6 text-xl font-semibold tracking-tight text-[#2F4A33] animate-pulse">
+            <h1 className="mt-6 text-xl font-semibold tracking-tight text-[#2F4A33]">
                 Carregando...
             </h1>
+
             <p className="mt-2 text-sm text-[#588157]">
                 Preparando o seu ambiente
             </p>

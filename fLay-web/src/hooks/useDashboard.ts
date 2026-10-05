@@ -1,6 +1,7 @@
 import {
     useCallback,
     useEffect,
+    useRef,
     useState,
 } from 'react'
 
@@ -22,7 +23,16 @@ import {
 
 import { useAuth } from './useAuth'
 
-export function useDashboard() {
+export interface DashboardData {
+    workdays: Workday[]
+    bankTransactions: BankTransaction[]
+    error: string | null
+    isLoading: boolean
+    isInitialLoading: boolean
+    loadDashboardData: () => Promise<void>
+}
+
+export function useDashboard(): DashboardData {
     const {
         userId,
     } = useAuth()
@@ -48,6 +58,8 @@ export function useDashboard() {
         isLoading,
         setIsLoading,
     ] = useState(true)
+    const hasLoadedOnceRef =
+        useRef(false)
 
     const loadDashboardData =
         useCallback(
@@ -78,6 +90,8 @@ export function useDashboard() {
 
                     throw loadError
                 } finally {
+                    hasLoadedOnceRef.current =
+                        true
                     setIsLoading(false)
                 }
             },
@@ -102,6 +116,9 @@ export function useDashboard() {
         bankTransactions,
         error,
         isLoading,
+        isInitialLoading:
+            isLoading &&
+            !hasLoadedOnceRef.current,
         loadDashboardData,
     }
 }

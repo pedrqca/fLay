@@ -11,13 +11,20 @@ import { LoadingScreen } from './components/LoadingScreen'
 import { Dashboard } from './pages/Dashboard'
 import { Proofs } from './pages/Proofs'
 import { WeeklyHistory } from './pages/WeeklyHistory'
+import { useDashboard } from './hooks/useDashboard'
 
 function App() {
+  const dashboardData = useDashboard()
+
   return (
     <BrowserRouter>
       <ScrollToTop />
 
-      <LoadingScreen />
+      <LoadingScreen
+        isLoading={
+          dashboardData.isInitialLoading
+        }
+      />
 
       <div className="flex min-h-screen bg-[#FAF9F6]">
         <Sidebar />
@@ -27,7 +34,11 @@ function App() {
             <Routes>
               <Route
                 path="/"
-                element={<Dashboard />}
+                element={
+                  <Dashboard
+                    {...dashboardData}
+                  />
+                }
               />
 
               <Route
@@ -37,7 +48,11 @@ function App() {
 
               <Route
                 path="/historico"
-                element={<WeeklyHistory />}
+                element={
+                  <WeeklyHistory
+                    {...dashboardData}
+                  />
+                }
               />
             </Routes>
           </div>
