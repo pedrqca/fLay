@@ -72,11 +72,12 @@ export function getExpectedMinutes(
     const dayOfWeek =
         dateValue.getUTCDay()
 
-    if (
-        dayOfWeek === 0 ||
-        dayOfWeek === 6
-    ) {
+    if (dayOfWeek === 0) {
         return 0
+    }
+
+    if (dayOfWeek === 6) {
+        return 240
     }
 
     return 480

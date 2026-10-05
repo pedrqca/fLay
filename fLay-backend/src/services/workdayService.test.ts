@@ -13,7 +13,7 @@ describe('workdayService', () => {
 
         expect(
             getExpectedMinutes('2026-10-03'),
-        ).toBe(0)
+        ).toBe(240)
 
         expect(
             getExpectedMinutes('2026-10-04'),

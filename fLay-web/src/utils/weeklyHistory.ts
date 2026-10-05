@@ -41,11 +41,27 @@ function createSummary(
     const date = parseCivilDate(dateString)
     const weekStart = getWeekStart(date)
     const weekEnd = getWeekEnd(date)
+    const cursor = new Date(weekStart)
+    let totalExpectedMinutes = 0
+
+    while (
+        cursor.getTime() <=
+        weekEnd.getTime()
+    ) {
+        totalExpectedMinutes +=
+            getExpectedMinutes(
+                formatDateKey(cursor),
+            )
+
+        cursor.setUTCDate(
+            cursor.getUTCDate() + 1,
+        )
+    }
 
     return {
         weekStart: formatDateKey(weekStart),
         weekEnd: formatDateKey(weekEnd),
-        totalExpectedMinutes: 0,
+        totalExpectedMinutes,
         totalWorkedMinutes: 0,
         balanceMinutes: 0,
         compensations: [],
@@ -67,8 +83,6 @@ export function calculateWeeklyHistory(
             summaries.get(weekKey) ??
             createSummary(workday.date)
 
-        summary.totalExpectedMinutes +=
-            getExpectedMinutes(workday.date)
         summary.totalWorkedMinutes +=
             calculateWorkdayMinutes(
                 workday.timeEntries.map(
@@ -81,18 +95,19 @@ export function calculateWeeklyHistory(
     }
 
     for (const transaction of transactions) {
-        if (transaction.type !== 'COMPENSATION') {
-            continue
-        }
-
         const weekKey = getWeekKey(transaction.date)
         const summary =
             summaries.get(weekKey) ??
             createSummary(transaction.date)
 
-        summary.compensations.push(
-            transaction,
-        )
+        if (
+            transaction.type ===
+            'COMPENSATION'
+        ) {
+            summary.compensations.push(
+                transaction,
+            )
+        }
 
         summaries.set(weekKey, summary)
     }
