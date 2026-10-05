@@ -4,14 +4,12 @@ import {
     LayoutDashboard,
     Menu,
     X,
+    ChevronLeft, 
+    ChevronRight 
 } from 'lucide-react'
 
 import { useState } from 'react'
-
-import {
-    NavLink,
-} from 'react-router-dom'
-
+import { NavLink } from 'react-router-dom'
 import logo from '../../assets/logo/flay-logo.png'
 
 const menuItems = [
@@ -33,10 +31,8 @@ const menuItems = [
 ]
 
 export function Sidebar() {
-    const [
-        isMobileMenuOpen,
-        setIsMobileMenuOpen,
-    ] = useState(false)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
 
     function closeMobileMenu() {
         setIsMobileMenuOpen(false)
@@ -45,13 +41,29 @@ export function Sidebar() {
     return (
         <>
             {/* SIDEBAR DESKTOP */}
-            <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[#A3B18A]/30 bg-[#DAD7CD] px-5 py-6 md:flex">
-                <div className="mb-10 flex justify-center">
-                    <img
-                        src={logo}
-                        alt="fLay"
-                        className="h-40 w-auto"
-                    />
+            <aside
+                className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#A3B18A]/30 bg-[#DAD7CD] py-6 transition-all duration-300 md:flex 
+                ${isDesktopCollapsed ? 'w-20 px-3' : 'w-64 px-5'}`}
+            >
+                {/* Header da Sidebar Desktop (Logo e Botão de Toggle) */}
+                <div className={`mb-10 flex items-start ${isDesktopCollapsed ? 'justify-center' : 'justify-between'}`}>
+                    {!isDesktopCollapsed && (
+                        <img
+                            src={logo}
+                            alt="fLay"
+                            className="h-40 w-auto transition-opacity duration-300"
+                        />
+                    )}
+
+                    {/* Botão de recolher/expandir */}
+                    <button
+                        type="button"
+                        onClick={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#A3B18A]/30 ${isDesktopCollapsed ? 'mt-2' : ''}`}
+                        title={isDesktopCollapsed ? "Expandir menu" : "Recolher menu"}
+                    >
+                        {isDesktopCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                    </button>
                 </div>
 
                 <nav className="flex flex-col gap-2">
@@ -62,16 +74,26 @@ export function Sidebar() {
                             <NavLink
                                 key={item.label}
                                 to={item.path}
+                                title={isDesktopCollapsed ? item.label : undefined} 
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive
+                                    `flex items-center rounded-xl transition-all duration-200 text-sm font-medium ${
+                                    isDesktopCollapsed
+                                        ? 'justify-center w-12 h-12 mx-auto px-0'
+                                        : 'gap-3 px-4 py-3'
+                                    } ${isActive
                                         ? 'bg-[#A3B18A]/40 text-[#2F4A33]'
                                         : 'text-[#588157] hover:bg-[#A3B18A]/30'
                                     }`
                                 }
                             >
-                                <Icon size={19} />
+                                <Icon size={19} className="shrink-0" />
 
-                                {item.label}
+                                {/* Esconde o texto quando a sidebar estiver recolhida */}
+                                {!isDesktopCollapsed && (
+                                    <span className="truncate whitespace-nowrap transition-opacity duration-300">
+                                        {item.label}
+                                    </span>
+                                )}
                             </NavLink>
                         )
                     })}
@@ -82,9 +104,7 @@ export function Sidebar() {
             <header className="fixed left-0 right-0 top-0 z-40 flex h-20 items-center justify-between border-b border-[#A3B18A]/30 bg-[#DAD7CD] px-5 md:hidden">
                 <button
                     type="button"
-                    onClick={() =>
-                        setIsMobileMenuOpen(true)
-                    }
+                    onClick={() => setIsMobileMenuOpen(true)}
                     className="flex h-10 w-10 items-center justify-center rounded-xl text-[#588157] transition-colors hover:bg-[#A3B18A]/30"
                     aria-label="Abrir menu"
                 >
@@ -112,9 +132,7 @@ export function Sidebar() {
 
             {/* MENU MOBILE */}
             <aside
-                className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-[#DAD7CD] px-5 py-6 shadow-xl transition-transform duration-300 md:hidden ${isMobileMenuOpen
-                    ? 'translate-x-0'
-                    : '-translate-x-full'
+                className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-[#DAD7CD] px-5 py-6 shadow-xl transition-transform duration-300 md:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="mb-8 flex items-center justify-between">
@@ -126,9 +144,7 @@ export function Sidebar() {
 
                     <button
                         type="button"
-                        onClick={
-                            closeMobileMenu
-                        }
+                        onClick={closeMobileMenu}
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-[#588157] transition-colors hover:bg-[#A3B18A]/30"
                         aria-label="Fechar menu"
                     >
@@ -144,9 +160,7 @@ export function Sidebar() {
                             <NavLink
                                 key={item.label}
                                 to={item.path}
-                                onClick={
-                                    closeMobileMenu
-                                }
+                                onClick={closeMobileMenu}
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive
                                         ? 'bg-[#A3B18A]/40 text-[#2F4A33]'
@@ -155,7 +169,6 @@ export function Sidebar() {
                                 }
                             >
                                 <Icon size={19} />
-
                                 {item.label}
                             </NavLink>
                         )
