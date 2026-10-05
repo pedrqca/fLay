@@ -1,38 +1,37 @@
-export interface WorkdayTimeEntry {
-    id: number
-    workdayId: number
-    time: string
-    createdAt: string
-}
-
-export interface Workday {
-    id: number
-    userId: number
-    date: string
-    createdAt: string
-    timeEntries: WorkdayTimeEntry[]
-}
-
-export interface CreateWorkdayData {
-    userId: number
-    expectedMinutes: number
-    proofs: {
-        date: string
-        time: string
-    }[]
-}
-
-export interface UpdateWorkdayData {
-    expectedMinutes: number
-    proofs: {
-        date: string
-        time: string
-    }[]
-}
+import type {
+    Workday,
+    CreateWorkdayData,
+    UpdateWorkdayData,
+} from '../types/workday'
 
 const API_URL =
     import.meta.env.VITE_API_URL ??
     'http://localhost:3333'
+
+async function getResponseErrorMessage(
+    response: Response,
+    fallback: string,
+): Promise<string> {
+    try {
+        const errorData =
+            (await response.json()) as {
+                message?: string
+                error?: string
+            }
+
+        if (errorData.message) {
+            return errorData.message
+        }
+
+        if (errorData.error) {
+            return errorData.error
+        }
+    } catch {
+        // Keep the operation-specific fallback when the body is not JSON.
+    }
+
+    return fallback
+}
 
 export async function getWorkdays(
     userId: number,
@@ -66,12 +65,11 @@ export async function createWorkday(
     )
 
     if (!response.ok) {
-        const error =
-            await response.json()
-
         throw new Error(
-            error.message ??
-            'Não foi possível registrar a jornada.',
+            await getResponseErrorMessage(
+                response,
+                'Não foi possível registrar a jornada.',
+            ),
         )
     }
 
@@ -95,12 +93,11 @@ export async function updateWorkday(
     )
 
     if (!response.ok) {
-        const error =
-            await response.json()
-
         throw new Error(
-            error.message ??
-            'Não foi possível atualizar a jornada.',
+            await getResponseErrorMessage(
+                response,
+                'Não foi possível atualizar a jornada.',
+            ),
         )
     }
 

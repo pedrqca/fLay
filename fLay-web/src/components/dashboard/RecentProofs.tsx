@@ -133,10 +133,10 @@ export function RecentProofs({
                 data,
                 proofToEdit?.id,
             )
+            handleCloseProofModal()
         } catch (error) {
             console.error('Erro ao salvar:', error)
-        } finally {
-            handleCloseProofModal()
+            throw error
         }
     }
 

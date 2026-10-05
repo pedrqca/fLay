@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { parseProofs } from './proofParser.js'
 import { buildWorkday } from './workdayBuilder.js'
-import { calculateWorkday } from './workdayCalculator.js'
+import {
+    calculateWorkday,
+    getExpectedMinutes,
+} from './workdayCalculator.js'
 import {
     createBankTransaction,
     calculateBankBalance,
@@ -34,7 +37,9 @@ describe('fluxo completo do banco de horas', () => {
 
         const workdayResult = calculateWorkday({
             ...workday,
-            expectedMinutes: 8 * 60,
+            expectedMinutes: getExpectedMinutes(
+                workday.date,
+            ),
         })
 
         const transaction = createBankTransaction(
@@ -86,7 +91,9 @@ describe('fluxo completo do banco de horas', () => {
 
         const workdayResult = calculateWorkday({
             ...workday,
-            expectedMinutes: 8 * 60,
+            expectedMinutes: getExpectedMinutes(
+                workday.date,
+            ),
         })
 
         const transaction = createBankTransaction(

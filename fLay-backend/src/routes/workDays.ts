@@ -8,6 +8,31 @@ import {
     deleteWorkday,
 } from '../services/workdayPersistenceService.js'
 
+const proofSchema = {
+    type: 'object',
+    required: [
+        'date',
+        'time',
+    ],
+    properties: {
+        date: {
+            type: 'string',
+            pattern:
+                '^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,3})?Z?)?$',
+        },
+        time: {
+            type: 'string',
+            pattern:
+                '^([01]\\d|2[0-3]):([0-5]\\d)$',
+        },
+    },
+} as const
+
+const proofsSchema = {
+    type: 'array',
+    items: proofSchema,
+} as const
+
 export async function workdayRoutes(
     app: FastifyInstance,
 ) {
@@ -41,20 +66,38 @@ export async function workdayRoutes(
 
     app.put(
         '/workdays/:id',
+        {
+            schema: {
+                params: {
+                    type: 'object',
+                    required: ['id'],
+                    properties: {
+                        id: {
+                            type: 'integer',
+                        },
+                    },
+                },
+                body: {
+                    type: 'object',
+                    required: ['proofs'],
+                    properties: {
+                        proofs: proofsSchema,
+                    },
+                },
+            },
+        },
         async (request, reply) => {
             const { id } = request.params as {
                 id: string
             }
 
             const body = request.body as {
-                expectedMinutes: number
                 proofs: ParsedProof[]
             }
 
             const result =
                 processWorkday(
                     body.proofs,
-                    body.expectedMinutes,
                 )
 
             try {
@@ -86,6 +129,19 @@ export async function workdayRoutes(
 
     app.delete(
         '/workdays/:id',
+        {
+            schema: {
+                params: {
+                    type: 'object',
+                    required: ['id'],
+                    properties: {
+                        id: {
+                            type: 'integer',
+                        },
+                    },
+                },
+            },
+        },
         async (request, reply) => {
             const { id } = request.params as {
                 id: string
@@ -113,17 +169,32 @@ export async function workdayRoutes(
 
     app.post(
         '/workdays',
+        {
+            schema: {
+                body: {
+                    type: 'object',
+                    required: [
+                        'userId',
+                        'proofs',
+                    ],
+                    properties: {
+                        userId: {
+                            type: 'integer',
+                        },
+                        proofs: proofsSchema,
+                    },
+                },
+            },
+        },
         async (request, reply) => {
             const body = request.body as {
                 userId: number
-                expectedMinutes: number
                 proofs: ParsedProof[]
             }
 
             const result =
                 processWorkday(
                     body.proofs,
-                    body.expectedMinutes,
                 )
 
             try {

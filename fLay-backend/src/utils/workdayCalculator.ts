@@ -28,6 +28,60 @@ export interface WeekResult {
     }>
 }
 
+export function getExpectedMinutes(
+    date: string | Date,
+): number {
+    let dateValue: Date
+
+    if (
+        typeof date === 'string' &&
+        /^\d{4}-\d{2}-\d{2}$/.test(date)
+    ) {
+        const parts =
+            date.split('-')
+
+        const year =
+            Number(parts[0])
+
+        const month =
+            Number(parts[1])
+
+        const day =
+            Number(parts[2])
+
+        dateValue = new Date(
+            Date.UTC(
+                year,
+                month - 1,
+                day,
+            ),
+        )
+    } else {
+        dateValue =
+            typeof date === 'string'
+                ? new Date(date)
+                : date
+    }
+
+    if (Number.isNaN(dateValue.getTime())) {
+        throw new Error(
+            `Data inválida: "${String(date)}".`,
+        )
+    }
+
+    const dayOfWeek =
+        dateValue.getUTCDay()
+
+    if (
+        dayOfWeek === 0 ||
+        dayOfWeek === 6
+    ) {
+        return 0
+    }
+
+    return 480
+}
+
 function timeToMinutes(
     time: string,
 ): number {

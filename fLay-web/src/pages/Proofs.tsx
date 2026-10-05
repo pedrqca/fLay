@@ -29,7 +29,6 @@ import {
     createWorkday,
     updateWorkday,
     deleteWorkday,
-    type Workday,
 } from '../api/workdays'
 
 import {
@@ -37,10 +36,33 @@ import {
     createBankTransaction,
     updateBankTransaction,
     deleteBankTransaction,
-    type BankTransaction,
 } from '../api/bankTransactions'
 
-const USER_ID = 1
+import type {
+    Workday,
+} from '../types/workday'
+
+import type {
+    BankTransaction,
+} from '../types/bankTransaction'
+
+import {
+    formatDate,
+    getDateKey,
+    getExpectedMinutes,
+    parseCivilDate,
+} from '../utils/date'
+
+import {
+    convertHoursToMinutes,
+    formatMinutesLong,
+} from '../utils/time'
+
+import {
+    calculateWorkdayBalance,
+} from '../utils/workdayCalculator'
+
+import { useAuth } from '../hooks/useAuth'
 
 interface ProofListItem {
     id: string
@@ -63,178 +85,6 @@ interface ProofListItem {
     | 'COMPENSATION'
 }
 
-function getExpectedMinutes(
-    date: string,
-): number {
-    const [
-        year,
-        month,
-        day,
-    ] = date
-        .split('-')
-        .map(Number)
-
-    const dateObject =
-        new Date(
-            year,
-            month - 1,
-            day,
-        )
-
-    const dayOfWeek =
-        dateObject.getDay()
-
-    if (dayOfWeek === 0) {
-        return 0
-    }
-
-    if (dayOfWeek === 6) {
-        return 240
-    }
-
-    return 480
-}
-
-function convertHoursToMinutes(
-    hours: string,
-): number {
-    if (!hours) {
-        return 0
-    }
-
-    const [
-        hoursPart,
-        minutesPart,
-    ] = hours
-        .split(':')
-        .map(Number)
-
-    if (
-        !Number.isFinite(
-            hoursPart,
-        ) ||
-        !Number.isFinite(
-            minutesPart,
-        )
-    ) {
-        return 0
-    }
-
-    return (
-        hoursPart * 60 +
-        minutesPart
-    )
-}
-
-function formatDate(
-    date: string,
-): string {
-    const dateOnly =
-        date.split('T')[0]
-
-    const [
-        year,
-        month,
-        day,
-    ] = dateOnly.split('-')
-
-    return `${day}/${month}/${year}`
-}
-
-function getDateOnly(
-    date: string,
-): string {
-    return date.split('T')[0]
-}
-
-function formatMinutes(
-    minutes: number,
-): string {
-    const absoluteMinutes =
-        Math.abs(minutes)
-
-    const hours =
-        Math.floor(
-            absoluteMinutes / 60,
-        )
-
-    const remainingMinutes =
-        absoluteMinutes % 60
-
-    return `${hours
-        .toString()
-        .padStart(
-            2,
-            '0',
-        )}h ${remainingMinutes
-            .toString()
-            .padStart(
-                2,
-                '0',
-            )}min`
-}
-
-function calculateWorkdayMinutes(
-    times: string[],
-): number {
-    let totalMinutes = 0
-
-    for (
-        let index = 0;
-        index < times.length;
-        index += 2
-    ) {
-        const [
-            startHour,
-            startMinute,
-        ] = times[index]
-            .split(':')
-            .map(Number)
-
-        const [
-            endHour,
-            endMinute,
-        ] = times[
-            index + 1
-        ]
-            .split(':')
-            .map(Number)
-
-        const start =
-            startHour * 60 +
-            startMinute
-
-        const end =
-            endHour * 60 +
-            endMinute
-
-        totalMinutes +=
-            end - start
-    }
-
-    return totalMinutes
-}
-
-function calculateWorkdayBalance(
-    date: string,
-    times: string[],
-): number {
-    const workedMinutes =
-        calculateWorkdayMinutes(
-            times,
-        )
-
-    const expectedMinutes =
-        getExpectedMinutes(
-            date,
-        )
-
-    return (
-        workedMinutes -
-        expectedMinutes
-    )
-}
-
 function buildProofList(
     workdays: Workday[],
     transactions: BankTransaction[],
@@ -243,7 +93,7 @@ function buildProofList(
         workdays.map(
             (workday) => {
                 const date =
-                    getDateOnly(
+                    getDateKey(
                         workday.date,
                     )
 
@@ -267,7 +117,7 @@ function buildProofList(
                     )
 
                 return {
-                    id: `workday-${workday.id}`,
+                    id: `workday - ${ workday.id } `,
                     date,
                     type: 'WORKDAY' as const,
 
@@ -310,9 +160,9 @@ function buildProofList(
                 (
                     transaction,
                 ) => ({
-                    id: `compensation-${transaction.id}`,
+                    id: `compensation - ${ transaction.id } `,
 
-                    date: getDateOnly(
+                    date: getDateKey(
                         transaction.date,
                     ),
 
@@ -341,16 +191,20 @@ function buildProofList(
         ...compensationItems,
     ].sort(
         (a, b) =>
-            new Date(
+            parseCivilDate(
                 b.date,
             ).getTime() -
-            new Date(
+            parseCivilDate(
                 a.date,
             ).getTime(),
     )
 }
 
 export function Proofs() {
+    const {
+        userId,
+    } = useAuth()
+
     const [
         workdays,
         setWorkdays,
@@ -444,9 +298,9 @@ export function Proofs() {
                 workdaysData,
                 transactionsData,
             ] = await Promise.all([
-                getWorkdays(USER_ID),
+                getWorkdays(userId),
                 getBankTransactions(
-                    USER_ID,
+                    userId,
                 ),
             ])
 
@@ -507,7 +361,7 @@ export function Proofs() {
         }
 
         setEditingProof({
-            date: getDateOnly(
+            date: getDateKey(
                 workday.date,
             ),
 
@@ -572,7 +426,7 @@ export function Proofs() {
                 )
             } else {
                 await createWorkday({
-                    userId: USER_ID,
+                    userId,
                     expectedMinutes,
                     proofs,
                 })
@@ -705,7 +559,7 @@ export function Proofs() {
         setEditingCompensation({
             id: transaction.id,
 
-            date: getDateOnly(
+            date: getDateKey(
                 transaction.date,
             ),
 
@@ -789,7 +643,7 @@ export function Proofs() {
             } else {
                 await createBankTransaction(
                     {
-                        userId: USER_ID,
+                        userId,
                         date: data.date,
                         type: 'COMPENSATION',
                         minutes,
@@ -1058,7 +912,7 @@ export function Proofs() {
                                                                                 index,
                                                                             ) => (
                                                                                 <span
-                                                                                    key={`${item.id}-${time}-${index}`}
+                                                                                    key={`${ item.id } -${ time } -${ index } `}
                                                                                     className="rounded-lg bg-[#FAF9F6] px-2.5 py-1.5 text-xs font-medium text-[#2F4A33]"
                                                                                 >
                                                                                     {
@@ -1085,9 +939,9 @@ export function Proofs() {
                                                                 <>
                                                                     <p className="text-sm font-semibold text-[#B45353]">
                                                                         -
-                                                                        {formatMinutes(
+                                                                        {formatMinutesLong(
                                                                             item.minutes ??
-                                                                            0,
+                                                                                0,
                                                                         )}
                                                                     </p>
 
@@ -1110,17 +964,18 @@ export function Proofs() {
                                                             ) : (
                                                                 <>
                                                                     <p
-                                                                        className={`text-sm font-semibold ${isPositive
-                                                                            ? 'text-[#588157]'
-                                                                            : 'text-[#B45353]'
-                                                                            }`}
+                                                                        className={`text - sm font - semibold ${
+    isPositive
+        ? 'text-[#588157]'
+        : 'text-[#B45353]'
+} `}
                                                                     >
                                                                         {isPositive
                                                                             ? '+'
                                                                             : '-'}
-                                                                        {formatMinutes(
+                                                                        {formatMinutesLong(
                                                                             item.minutes ??
-                                                                            0,
+                                                                                0,
                                                                         )}
                                                                     </p>
 
@@ -1145,7 +1000,7 @@ export function Proofs() {
                                                                     if (
                                                                         isCompensation &&
                                                                         item.transactionId !==
-                                                                        undefined
+                                                                            undefined
                                                                     ) {
                                                                         openEditCompensationModal(
                                                                             item.transactionId,
@@ -1156,7 +1011,7 @@ export function Proofs() {
 
                                                                     if (
                                                                         item.workdayId !==
-                                                                        undefined
+                                                                            undefined
                                                                     ) {
                                                                         openEditProofModal(
                                                                             item.workdayId,
@@ -1185,7 +1040,7 @@ export function Proofs() {
                                                                     if (
                                                                         isCompensation &&
                                                                         item.transactionId !==
-                                                                        undefined
+                                                                            undefined
                                                                     ) {
                                                                         handleDeleteCompensation(
                                                                             item.transactionId,
@@ -1196,7 +1051,7 @@ export function Proofs() {
 
                                                                     if (
                                                                         item.workdayId !==
-                                                                        undefined
+                                                                            undefined
                                                                     ) {
                                                                         handleDeleteProof(
                                                                             item.workdayId,
@@ -1310,7 +1165,7 @@ export function Proofs() {
                             formatDate(
                                 compensationToDelete.date,
                             ),
-                            formatMinutes(
+                            formatMinutesLong(
                                 compensationToDelete.minutes,
                             ),
                         ]

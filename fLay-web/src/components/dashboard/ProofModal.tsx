@@ -263,7 +263,11 @@ export function ProofModal({
             await onSubmit(data)
         } catch (err) {
             console.error('Erro ao salvar jornada:', err)
-            setError('Ocorreu um erro ao salvar. Tente novamente.')
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Ocorreu um erro inesperado.',
+            )
         } finally {
             setIsSubmitting(false)
         }

@@ -5,8 +5,13 @@ import {
     Trash2,
 } from 'lucide-react'
 
-import type { BankTransaction } from '../../../../fLay-backend/src/utils/bankCalculator'
-import { formatMinutes } from '../../../../fLay-backend/src/utils/timeFormatter'
+import type {
+    BankTransaction,
+} from '../../types/bankTransaction'
+
+import {
+    formatMinutes,
+} from '../../utils/time'
 
 interface BankHistoryProps {
     transactions: BankTransaction[]

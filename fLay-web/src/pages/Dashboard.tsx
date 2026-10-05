@@ -1,342 +1,110 @@
-import {
-    CalendarDays,
-    Clock3,
-    TrendingUp,
-} from 'lucide-react'
-
-import {
-    useEffect,
-    useState,
-} from 'react'
+import { CalendarDays, Clock3, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
 
 import { StatCard } from '../components/dashboard/StatCard'
 import { RecentProofs } from '../components/dashboard/RecentProofs'
 import { BankHistory } from '../components/dashboard/BankHistory'
 import { CardWarning } from '../components/ui/CardWarning'
 
-import {
-    calculateWeek,
-} from '../../../fLay-backend/src/utils/workdayCalculator'
+import type { BankTransaction } from '../types/bankTransaction'
+import type { CompensationData } from '../components/dashboard/CompensationModal'
+
+import { calculateWeek } from '../utils/workdayCalculator'
+import { calculateBankBalance } from '../utils/bankCalculator'
+import { formatMinutes } from '../utils/time'
 
 import {
-    calculateBankBalance,
-} from '../../../fLay-backend/src/utils/bankCalculator'
-
-import type {
-    BankTransaction as CalculatedBankTransaction,
-} from '../../../fLay-backend/src/utils/bankCalculator'
-
-import {
-    formatMinutes,
-} from '../../../fLay-backend/src/utils/timeFormatter'
-
-import {
-    createWorkday,
-    getWorkdays,
-    updateWorkday,
-    deleteWorkday,
-    type Workday,
-} from '../api/workdays'
-
-import {
-    createBankTransaction,
-    deleteBankTransaction,
-    getBankTransactions,
-    updateBankTransaction,
-} from '../api/bankTransactions'
-
-import type {
-    BankTransaction as ApiBankTransaction,
-} from '../api/bankTransactions'
+    getCurrentWeekRange,
+    getDateKey,
+    normalizeDate,
+} from '../utils/date'
 
 import {
     mapWorkdaysToWeekdays,
+    mapWorkdaysToProofs,
 } from '../utils/workdayMapper'
 
-import type {
-    CompensationData,
-    CompensationToEdit,
-} from '../components/dashboard/CompensationModal'
-
-import type {
-    ProofData,
-} from '../components/dashboard/ProofModal'
-
-function formatDateKey(
-    date: Date,
-): string {
-    const year =
-        date.getFullYear()
-
-    const month = String(
-        date.getMonth() + 1,
-    ).padStart(2, '0')
-
-    const day = String(
-        date.getDate(),
-    ).padStart(2, '0')
-
-    return `${year}-${month}-${day}`
-}
-
-function getCurrentWeekRange() {
-    const today = new Date()
-
-    const currentDay =
-        today.getDay()
-
-    const daysFromMonday =
-        currentDay === 0
-            ? -6
-            : 1 - currentDay
-
-    const startOfWeek =
-        new Date(today)
-
-    startOfWeek.setHours(
-        0,
-        0,
-        0,
-        0,
-    )
-
-    startOfWeek.setDate(
-        today.getDate() +
-        daysFromMonday,
-    )
-
-    const endOfWeek =
-        new Date(startOfWeek)
-
-    endOfWeek.setDate(
-        startOfWeek.getDate() + 6,
-    )
-
-    return {
-        start: formatDateKey(
-            startOfWeek,
-        ),
-        end: formatDateKey(
-            endOfWeek,
-        ),
-    }
-}
-
-function getWorkdayDateKey(
-    date: string,
-): string {
-    return date.split('T')[0]
-}
+import { useDashboard } from '../hooks/useDashboard'
+import { useCompensation } from '../hooks/useCompensation'
+import { useWorkday } from '../hooks/useWorkday'
 
 export function Dashboard() {
-    const [
-        bankTransactionsFromApi,
-        setBankTransactionsFromApi,
-    ] = useState<
-        ApiBankTransaction[]
-    >([])
-
-    const [
+    const {
         workdays,
-        setWorkdays,
-    ] = useState<Workday[]>([])
-
-    const [
-        editingCompensation,
-        setEditingCompensation,
-    ] = useState<
-        CompensationToEdit | null
-    >(null)
+        bankTransactions: bankTransactionsFromApi,
+        error,
+        loadDashboardData,
+    } = useDashboard()
 
     const [
         isCompensationModalOpen,
         setIsCompensationModalOpen,
     ] = useState(false)
 
-    const [
+    const {
+        editingCompensation,
         compensationToDelete,
-        setCompensationToDelete,
-    ] = useState<
-        ApiBankTransaction | null
-    >(null)
-
-    const [
         isDeletingCompensation,
-        setIsDeletingCompensation,
-    ] = useState(false)
 
-    async function loadDashboardData() {
-        const [
-            updatedWorkdays,
-            updatedTransactions,
-        ] = await Promise.all([
-            getWorkdays(1),
-            getBankTransactions(1),
-        ])
-
-        setWorkdays(
-            updatedWorkdays,
-        )
-
-        setBankTransactionsFromApi(
-            updatedTransactions,
-        )
-    }
-
-    useEffect(() => {
-        loadDashboardData().catch(
-            (error) => {
-                console.error(
-                    'Erro ao carregar dados:',
-                    error,
-                )
-            },
-        )
-    }, [])
-
-    const compensationTransactions =
-        bankTransactionsFromApi.filter(
-            (
-                transaction,
-            ) =>
-                transaction.type ===
-                'COMPENSATION',
-        )
-
-    const currentWeek =
-        getCurrentWeekRange()
-
-    const currentWeekWorkdays =
-        workdays.filter(
-            (workday) => {
-                const workdayDate =
-                    getWorkdayDateKey(
-                        workday.date,
-                    )
-
-                return (
-                    workdayDate >=
-                    currentWeek.start &&
-                    workdayDate <=
-                    currentWeek.end
-                )
-            },
-        )
-
-    const weekdays =
-        mapWorkdaysToWeekdays(
-            currentWeekWorkdays,
-        )
-
-    const weekResult =
-        calculateWeek(
-            weekdays,
-        )
-
-    const bankTransactions: CalculatedBankTransaction[] =
-        bankTransactionsFromApi.map(
-            (
-                transaction,
-            ) => ({
-                date:
-                    transaction.date,
-
-                type:
-                    transaction.type,
-
-                minutes:
-                    transaction.minutes,
-
-                description:
-                    transaction.description,
-            }),
-        )
-
-    const bankResult =
-        calculateBankBalance(
-            bankTransactions,
-        )
-
-    const proofs = workdays.map(
-        (workday) => ({
-            id: workday.id,
-
-            date: new Date(
-                workday.date,
-            ).toLocaleDateString(
-                'pt-BR',
-                {
-                    timeZone: 'UTC',
-                },
-            ),
-
-            times:
-                workday.timeEntries.map(
-                    (
-                        timeEntry,
-                    ) =>
-                        timeEntry.time,
-                ),
-        }),
+        handleCompensationSubmit,
+        handleEditCompensation,
+        handleDeleteCompensation,
+        handleCloseDeleteCompensation,
+        handleConfirmDeleteCompensation,
+        clearEditingCompensation,
+    } = useCompensation(
+        bankTransactionsFromApi,
+        loadDashboardData,
     )
 
-    function normalizeDate(
-        date: string,
-    ): string {
-        return date.split('T')[0]
+    const {
+        handleProofSubmit,
+        handleDeleteWorkday,
+    } = useWorkday(loadDashboardData)
+
+    if (error) {
+        return (
+            <main className="min-h-screen flex-1 bg-[#FAF9F6] px-5 pb-8 pt-28 sm:px-6 md:px-10 md:py-8">
+                <div className="mx-auto max-w-7xl">
+                    <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-red-700">
+                        <p className="text-sm font-medium">
+                            {error}
+                        </p>
+                    </div>
+                </div>
+            </main>
+        )
     }
 
-    async function handleCompensationSubmit(
+    const currentWeek = getCurrentWeekRange()
+
+    const currentWeekWorkdays = workdays.filter((workday) => {
+        const workdayDate = getDateKey(workday.date)
+
+        return (
+            workdayDate >= currentWeek.start &&
+            workdayDate <= currentWeek.end
+        )
+    })
+
+    const weekdays = mapWorkdaysToWeekdays(
+        currentWeekWorkdays,
+    )
+
+    const weekResult = calculateWeek(weekdays)
+
+    const bankResult =
+        calculateBankBalance(bankTransactionsFromApi)
+
+    const proofs = mapWorkdaysToProofs(workdays)
+
+    async function handleSubmitCompensation(
         data: CompensationData,
     ) {
         try {
-            const [
-                hours,
-                minutes,
-            ] = data.hours
-                .split(':')
-                .map(Number)
+            await handleCompensationSubmit(data)
 
-            const totalMinutes =
-                hours * 60 + minutes
-
-            if (
-                editingCompensation
-            ) {
-                await updateBankTransaction(
-                    editingCompensation.id,
-                    {
-                        date: data.date,
-                        type: 'COMPENSATION',
-                        minutes:
-                            totalMinutes,
-                        description:
-                            data.description,
-                    },
-                )
-            } else {
-                await createBankTransaction(
-                    {
-                        userId: 1,
-                        date: data.date,
-                        type: 'COMPENSATION',
-                        minutes:
-                            totalMinutes,
-                        description:
-                            data.description,
-                    },
-                )
-            }
-
-            await loadDashboardData()
-
-            setEditingCompensation(
-                null,
-            )
-
-            setIsCompensationModalOpen(
-                false,
-            )
+            setIsCompensationModalOpen(false)
         } catch (error) {
             console.error(
                 'Erro ao salvar compensação:',
@@ -345,219 +113,21 @@ export function Dashboard() {
         }
     }
 
-    function handleEditCompensation(
-        transaction: CalculatedBankTransaction,
-    ) {
-        const apiTransaction =
-            compensationTransactions.find(
-                (
-                    currentTransaction,
-                ) =>
-                    normalizeDate(
-                        currentTransaction.date,
-                    ) ===
-                    normalizeDate(
-                        transaction.date,
-                    ) &&
-                    currentTransaction.type ===
-                    transaction.type &&
-                    currentTransaction.minutes ===
-                    transaction.minutes &&
-                    currentTransaction.description ===
-                    transaction.description,
-            )
-
-        if (!apiTransaction) {
-            console.error(
-                'Não foi possível localizar a compensação.',
-            )
-
-            return
-        }
-
-        setEditingCompensation({
-            id: apiTransaction.id,
-
-            date:
-                apiTransaction.date,
-
-            minutes:
-                apiTransaction.minutes,
-
-            description:
-                apiTransaction.description,
-        })
-
-        setIsCompensationModalOpen(
-            true,
-        )
-    }
-
-    function handleDeleteCompensation(
-        transaction: CalculatedBankTransaction,
-    ) {
-        const apiTransaction =
-            compensationTransactions.find(
-                (
-                    currentTransaction,
-                ) =>
-                    normalizeDate(
-                        currentTransaction.date,
-                    ) ===
-                    normalizeDate(
-                        transaction.date,
-                    ) &&
-                    currentTransaction.type ===
-                    transaction.type &&
-                    currentTransaction.minutes ===
-                    transaction.minutes &&
-                    currentTransaction.description ===
-                    transaction.description,
-            )
-
-        if (!apiTransaction) {
-            console.error(
-                'Não foi possível localizar a compensação.',
-            )
-
-            return
-        }
-
-        setCompensationToDelete(
-            apiTransaction,
-        )
-    }
-
-    function handleCloseDeleteCompensation() {
-        if (
-            isDeletingCompensation
-        ) {
-            return
-        }
-
-        setCompensationToDelete(
-            null,
-        )
-    }
-
-    async function handleConfirmDeleteCompensation() {
-        if (
-            !compensationToDelete
-        ) {
-            return
-        }
-
-        try {
-            setIsDeletingCompensation(
-                true,
-            )
-
-            await deleteBankTransaction(
-                compensationToDelete.id,
-            )
-
-            await loadDashboardData()
-
-            setCompensationToDelete(
-                null,
-            )
-        } catch (error) {
-            console.error(
-                'Erro ao excluir compensação:',
-                error,
-            )
-        } finally {
-            setIsDeletingCompensation(
-                false,
-            )
-        }
-    }
-
-    async function handleDeleteWorkday(
-        workdayId: number,
-    ) {
-        await deleteWorkday(
-            workdayId,
-        )
-
-        await loadDashboardData()
-    }
-
-    async function handleProofSubmit(
-        data: ProofData,
-        workdayId?: number,
-    ) {
-        try {
-            const date = new Date(
-                `${data.date}T00:00:00`,
-            )
-
-            const day =
-                date.getDay()
-
-            const expectedMinutes =
-                day === 6
-                    ? 240
-                    : day === 0
-                        ? 0
-                        : 480
-
-            const proofs =
-                data.times.map(
-                    (
-                        time,
-                    ) => ({
-                        date:
-                            data.date,
-                        time,
-                    }),
-                )
-
-            if (workdayId) {
-                await updateWorkday(
-                    workdayId,
-                    {
-                        expectedMinutes,
-                        proofs,
-                    },
-                )
-            } else {
-                await createWorkday({
-                    userId: 1,
-                    expectedMinutes,
-                    proofs,
-                })
-            }
-
-            await loadDashboardData()
-        } catch (error) {
-            console.error(
-                workdayId
-                    ? 'Erro ao atualizar jornada:'
-                    : 'Erro ao registrar jornada:',
-                error,
-            )
-        }
-    }
-
     function handleOpenNewCompensation() {
-        setEditingCompensation(
-            null,
-        )
-
-        setIsCompensationModalOpen(
-            true,
-        )
+        clearEditingCompensation()
+        setIsCompensationModalOpen(true)
     }
 
     function handleCloseCompensation() {
-        setIsCompensationModalOpen(
-            false,
-        )
+        setIsCompensationModalOpen(false)
+        clearEditingCompensation()
+    }
 
-        setEditingCompensation(
-            null,
-        )
+    function handleEditCompensationAndOpenModal(
+        transaction: BankTransaction,
+    ) {
+        handleEditCompensation(transaction)
+        setIsCompensationModalOpen(true)
     }
 
     return (
@@ -616,36 +186,27 @@ export function Dashboard() {
                         handleCloseCompensation
                     }
                     onCompensationSubmit={
-                        handleCompensationSubmit
+                        handleSubmitCompensation
                     }
                     editingCompensation={
                         editingCompensation
                     }
-                    onProofSubmit={
-                        handleProofSubmit
-                    }
-                    onDelete={
-                        handleDeleteWorkday
-                    }
+                    onProofSubmit={handleProofSubmit}
+                    onDelete={handleDeleteWorkday}
                 />
 
                 <BankHistory
-                    transactions={
-                        bankTransactions
-                    }
+                    transactions={bankTransactionsFromApi}
                     onEdit={
-                        handleEditCompensation
+                        handleEditCompensationAndOpenModal
                     }
-                    onDelete={
-                        handleDeleteCompensation
-                    }
+                    onDelete={handleDeleteCompensation}
                 />
             </div>
 
             <CardWarning
                 isOpen={
-                    compensationToDelete !==
-                    null
+                    compensationToDelete !== null
                 }
                 title="Excluir compensação?"
                 description="Deseja realmente excluir esta compensação?"
@@ -655,25 +216,22 @@ export function Dashboard() {
                 itemDetails={
                     compensationToDelete
                         ? [
-                            normalizeDate(
-                                compensationToDelete.date,
-                            )
-                                .split('-')
-                                .reverse()
-                                .join('/'),
-
-                            formatMinutes(
-                                compensationToDelete.minutes,
-                            ),
-                        ]
+                              normalizeDate(
+                                  compensationToDelete.date,
+                              )
+                                  .split('-')
+                                  .reverse()
+                                  .join('/'),
+                              formatMinutes(
+                                  compensationToDelete.minutes,
+                              ),
+                          ]
                         : []
                 }
                 warning="Essa ação removerá a compensação do banco de horas. Essa operação não pode ser desfeita."
                 confirmLabel="Excluir compensação"
                 loadingLabel="Excluindo..."
-                isLoading={
-                    isDeletingCompensation
-                }
+                isLoading={isDeletingCompensation}
                 onClose={
                     handleCloseDeleteCompensation
                 }

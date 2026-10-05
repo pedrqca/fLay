@@ -4,6 +4,7 @@ import {
 } from '../utils/workdayBuilder.js'
 import {
     calculateWorkday,
+    getExpectedMinutes,
 } from '../utils/workdayCalculator.js'
 import {
     createBankTransaction,
@@ -11,9 +12,13 @@ import {
 
 export function processWorkday(
     proofs: ParsedProof[],
-    expectedMinutes: number,
 ) {
     const workday = buildWorkday(proofs)
+
+    const expectedMinutes =
+        getExpectedMinutes(
+            workday.date,
+        )
 
     const calculation = calculateWorkday({
         ...workday,

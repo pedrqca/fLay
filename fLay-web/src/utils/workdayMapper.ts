@@ -1,45 +1,23 @@
-import type { Workday } from '../api/workdays'
-
 import type {
+    Workday,
     Weekday,
-} from '../../../fLay-backend/src/utils/workdayCalculator'
+} from '../types/workday'
 
-function formatDate(
-    dateString: string,
-): string {
-    const date = new Date(dateString)
+import type { Proof } from '../types/proof'
 
-    return date.toLocaleDateString('pt-BR', {
-        timeZone: 'UTC',
-    })
-}
+import {
+    formatDate,
+    getExpectedMinutes,
+    parseCivilDate,
+} from './date'
 
 function getDayName(
     dateString: string,
 ): string {
-    const date = new Date(dateString)
-
-    return date.toLocaleDateString('pt-BR', {
+    return parseCivilDate(dateString).toLocaleDateString('pt-BR', {
         weekday: 'long',
         timeZone: 'UTC',
     })
-}
-
-function getExpectedMinutes(
-    dateString: string,
-): number {
-    const date = new Date(dateString)
-    const day = date.getUTCDay()
-
-    if (day === 6) {
-        return 240
-    }
-
-    if (day === 0) {
-        return 0
-    }
-
-    return 480
 }
 
 export function mapWorkdaysToWeekdays(
@@ -56,9 +34,22 @@ export function mapWorkdaysToWeekdays(
             times.length === 0 ||
             times.length % 2 !== 0
         ) {
-            throw new Error(
+            console.warn(
                 `A jornada de ${formatDate(workday.date)} possui uma quantidade inválida de registros de horário.`,
             )
+
+            return {
+                date: formatDate(workday.date),
+                day: getDayName(workday.date),
+                times: [
+                    '00:00',
+                    '00:00',
+                ],
+                expectedMinutes:
+                    getExpectedMinutes(
+                        workday.date,
+                    ),
+            }
         }
 
         return {
@@ -71,4 +62,16 @@ export function mapWorkdaysToWeekdays(
                 ),
         }
     })
+}
+
+export function mapWorkdaysToProofs(
+    workdays: Workday[],
+): Proof[] {
+    return workdays.map((workday) => ({
+        id: workday.id,
+        date: formatDate(workday.date),
+        times: workday.timeEntries.map(
+            (timeEntry) => timeEntry.time,
+        ),
+    }))
 }

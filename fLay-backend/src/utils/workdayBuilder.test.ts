@@ -28,14 +28,16 @@ describe('buildWorkday', () => {
 
         expect(result).toEqual({
             date: '2026-09-29',
-            entry: '08:02',
-            lunchExit: '11:23',
-            lunchReturn: '12:53',
-            exit: '18:42',
+            times: [
+                '08:02',
+                '11:23',
+                '12:53',
+                '18:42',
+            ],
         })
     })
 
-    it('deve rejeitar uma jornada com menos de 4 registros', () => {
+    it('deve aceitar uma jornada com dois registros', () => {
         const proofs = [
             {
                 date: '2026-09-29',
@@ -47,9 +49,13 @@ describe('buildWorkday', () => {
             },
         ]
 
-        expect(() => buildWorkday(proofs)).toThrow(
-            'A jornada deve possuir exatamente 4 registros de ponto.',
-        )
+        expect(buildWorkday(proofs)).toEqual({
+            date: '2026-09-29',
+            times: [
+                '08:02',
+                '11:23',
+            ],
+        })
     })
 
     it('deve rejeitar registros de datas diferentes', () => {
