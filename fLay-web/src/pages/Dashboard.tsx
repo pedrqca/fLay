@@ -489,7 +489,7 @@ export function Dashboard() {
     ) {
         try {
             const date = new Date(
-                `${ data.date } T00:00:00`,
+                `${data.date}T00:00:00`,
             )
 
             const day =
