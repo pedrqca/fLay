@@ -762,19 +762,19 @@ export function Proofs() {
 
     return (
         <>
-            <main className="min-h-screen flex-1 bg-[#FAF9F6] px-5 pb-8 pt-28 sm:px-6 md:px-10 md:py-8">
+            <main className="min-h-screen flex-1 bg-[#F1F5F9] px-5 pb-8 pt-28 sm:px-6 md:px-10 md:py-8">
                 <div className="mx-auto max-w-7xl">
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <p className="mb-2 text-sm font-medium text-[#A3B18A]">
+                            <p className="mb-2 text-sm font-medium text-slate-500">
                                 Jornada
                             </p>
 
-                            <h1 className="text-3xl font-semibold tracking-tight text-[#2F4A33] sm:text-4xl">
+                            <h1 className="text-3xl font-semibold tracking-tight text-[#0F172A] sm:text-4xl">
                                 Comprovantes
                             </h1>
 
-                            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#588157]">
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#0F172A]">
                                 Consulte e gerencie seus registros de ponto e compensações.
                             </p>
                         </div>
@@ -790,7 +790,7 @@ export function Proofs() {
                                 onClick={
                                     openCreateCompensationModal
                                 }
-                                className="flex items-center justify-center gap-2 rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-3 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0]/50 bg-white px-5 py-3 text-sm font-medium text-[#0F172A] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <Plus
                                     size={18}
@@ -809,7 +809,7 @@ export function Proofs() {
                                 onClick={
                                     openCreateProofModal
                                 }
-                                className="flex items-center justify-center gap-2 rounded-xl bg-[#588157] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex items-center justify-center gap-2 rounded-xl bg-[#6366F1] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#4F46E5] disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <Plus
                                     size={18}
@@ -828,19 +828,19 @@ export function Proofs() {
 
                     <div className="mt-8">
                         {isLoading ? (
-                            <div className="rounded-2xl border border-[#A3B18A]/30 bg-white p-10 text-center">
-                                <p className="text-sm text-[#588157]">
+                            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-10 text-center">
+                                <p className="text-sm text-[#0F172A]">
                                     Carregando comprovantes...
                                 </p>
                             </div>
                         ) : proofItems.length ===
                             0 ? (
-                            <div className="rounded-2xl border border-[#A3B18A]/30 bg-white p-10 text-center">
-                                <p className="text-sm font-medium text-[#2F4A33]">
+                            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-10 text-center">
+                                <p className="text-sm font-medium text-[#0F172A]">
                                     Nenhum comprovante registrado
                                 </p>
 
-                                <p className="mt-1 text-sm text-[#A3B18A]">
+                                <p className="mt-1 text-sm text-slate-500">
                                     Suas jornadas e compensações aparecerão aqui.
                                 </p>
                             </div>
@@ -862,11 +862,11 @@ export function Proofs() {
                                                 key={
                                                     item.id
                                                 }
-                                                className="rounded-2xl border border-[#A3B18A]/30 bg-white p-5"
+                                                className="rounded-2xl border border-[#E2E8F0] bg-white p-5"
                                             >
                                                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                                                     <div className="flex min-w-0 items-start gap-4">
-                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#DAD7CD] text-[#588157]">
+                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F8FAFC] text-[#0F172A]">
                                                             {isCompensation ? (
                                                                 <ArrowDownToLine
                                                                     size={
@@ -884,13 +884,13 @@ export function Proofs() {
 
                                                         <div className="min-w-0">
                                                             <div className="flex flex-wrap items-center gap-2">
-                                                                <h2 className="text-sm font-semibold text-[#2F4A33]">
+                                                                <h2 className="text-sm font-semibold text-[#0F172A]">
                                                                     {
                                                                         item.title
                                                                     }
                                                                 </h2>
 
-                                                                <span className="rounded-full bg-[#F0F1EA] px-2.5 py-1 text-xs font-medium text-[#588157]">
+                                                                <span className="rounded-full bg-[#F0F1EA] px-2.5 py-1 text-xs font-medium text-[#0F172A]">
                                                                     {formatDate(
                                                                         item.date,
                                                                     )}
@@ -898,7 +898,7 @@ export function Proofs() {
                                                             </div>
 
                                                             {isCompensation ? (
-                                                                <p className="mt-2 text-sm text-[#588157]">
+                                                                <p className="mt-2 text-sm text-[#0F172A]">
                                                                     {
                                                                         item.description
                                                                     }
@@ -913,7 +913,7 @@ export function Proofs() {
                                                                             ) => (
                                                                                 <span
                                                                                     key={`${ item.id } -${ time } -${ index } `}
-                                                                                    className="rounded-lg bg-[#FAF9F6] px-2.5 py-1.5 text-xs font-medium text-[#2F4A33]"
+                                                                                    className="rounded-lg bg-[#F8FAFC] px-2.5 py-1.5 text-xs font-medium text-[#0F172A]"
                                                                                 >
                                                                                     {
                                                                                         time
@@ -923,7 +923,7 @@ export function Proofs() {
                                                                         )}
                                                                     </div>
 
-                                                                    <p className="mt-2 text-sm text-[#588157]">
+                                                                    <p className="mt-2 text-sm text-[#0F172A]">
                                                                         {
                                                                             item.description
                                                                         }
@@ -945,19 +945,19 @@ export function Proofs() {
                                                                         )}
                                                                     </p>
 
-                                                                    <p className="mt-1 text-xs text-[#A3B18A]">
+                                                                    <p className="mt-1 text-xs text-slate-500">
                                                                         Horas compensadas
                                                                     </p>
                                                                 </>
                                                             ) : item.minutes ===
                                                                 0 ? (
                                                                 <>
-                                                                    <p className="text-sm font-semibold text-[#588157]">
+                                                                    <p className="text-sm font-semibold text-[#0F172A]">
                                                                         00h
                                                                         00min
                                                                     </p>
 
-                                                                    <p className="mt-1 text-xs text-[#A3B18A]">
+                                                                    <p className="mt-1 text-xs text-slate-500">
                                                                         Jornada completa
                                                                     </p>
                                                                 </>
@@ -966,7 +966,7 @@ export function Proofs() {
                                                                     <p
                                                                         className={`text - sm font - semibold ${
     isPositive
-        ? 'text-[#588157]'
+        ? 'text-[#0F172A]'
         : 'text-[#B45353]'
 } `}
                                                                     >
@@ -979,7 +979,7 @@ export function Proofs() {
                                                                         )}
                                                                     </p>
 
-                                                                    <p className="mt-1 text-xs text-[#A3B18A]">
+                                                                    <p className="mt-1 text-xs text-slate-500">
                                                                         {isPositive
                                                                             ? 'Horas extras'
                                                                             : 'Débito de horas'}
@@ -1018,7 +1018,7 @@ export function Proofs() {
                                                                         )
                                                                     }
                                                                 }}
-                                                                className="flex items-center gap-2 rounded-lg border border-[#A3B18A]/40 px-3 py-2 text-xs font-medium text-[#588157] transition-colors hover:bg-[#FAF9F6] disabled:cursor-not-allowed disabled:opacity-50"
+                                                                className="flex items-center gap-2 rounded-lg border border-[#E2E8F0]/40 px-3 py-2 text-xs font-medium text-[#0F172A] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50"
                                                             >
                                                                 <Pencil
                                                                     size={

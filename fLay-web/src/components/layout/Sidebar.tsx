@@ -1,16 +1,16 @@
 import {
+    ChevronLeft,
+    ChevronRight,
     FileImage,
     History,
     LayoutDashboard,
     Menu,
     X,
-    ChevronLeft, 
-    ChevronRight 
 } from 'lucide-react'
-
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import logo from '../../assets/logo/flay-logo.png'
+
+import logo from '../../assets/layn-icon.png'
 
 const menuItems = [
     {
@@ -30,9 +30,52 @@ const menuItems = [
     },
 ]
 
+function navigationClass(
+    isActive: boolean,
+    collapsed = false,
+) {
+    return `flex items-center rounded-xl text-sm font-medium transition-all duration-200 ${
+        collapsed
+            ? 'mx-auto h-12 w-12 justify-center px-0'
+            : 'gap-3 px-4 py-3'
+    } ${
+        isActive
+            ? 'bg-[#6366F1] text-white shadow-lg shadow-indigo-950/30'
+            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+    }`
+}
+
+function Brand({
+    compact = false,
+}: {
+    compact?: boolean
+}) {
+    return (
+        <div className="flex items-center gap-3">
+            <img
+                src={logo}
+                alt="LAYN"
+                className={`${compact ? 'h-9 w-9' : 'h-10 w-10'} rounded-xl`}
+            />
+
+            {!compact && (
+                <span className="text-xl font-bold tracking-[0.2em] text-white">
+                    LAYN
+                </span>
+            )}
+        </div>
+    )
+}
+
 export function Sidebar() {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
+    const [
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
+    ] = useState(false)
+    const [
+        isDesktopCollapsed,
+        setIsDesktopCollapsed,
+    ] = useState(false)
 
     function closeMobileMenu() {
         setIsMobileMenuOpen(false)
@@ -40,29 +83,51 @@ export function Sidebar() {
 
     return (
         <>
-            {/* SIDEBAR DESKTOP */}
             <aside
-                className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#A3B18A]/30 bg-[#DAD7CD] py-6 transition-all duration-300 md:flex 
-                ${isDesktopCollapsed ? 'w-20 px-3' : 'w-64 px-5'}`}
+                className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-slate-800 bg-[#0F172A] py-6 transition-all duration-300 md:flex ${
+                    isDesktopCollapsed
+                        ? 'w-20 px-3'
+                        : 'w-64 px-5'
+                }`}
             >
-                {/* Header da Sidebar Desktop (Logo e Botão de Toggle) */}
-                <div className={`mb-10 flex items-start ${isDesktopCollapsed ? 'justify-center' : 'justify-between'}`}>
-                    {!isDesktopCollapsed && (
-                        <img
-                            src={logo}
-                            alt="fLay"
-                            className="h-40 w-auto transition-opacity duration-300"
-                        />
-                    )}
+                <div
+                    className={`mb-10 flex items-start ${
+                        isDesktopCollapsed
+                            ? 'justify-center'
+                            : 'justify-between'
+                    }`}
+                >
+                    <Brand
+                        compact={
+                            isDesktopCollapsed
+                        }
+                    />
 
-                    {/* Botão de recolher/expandir */}
                     <button
                         type="button"
-                        onClick={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#A3B18A]/30 ${isDesktopCollapsed ? 'mt-2' : ''}`}
-                        title={isDesktopCollapsed ? "Expandir menu" : "Recolher menu"}
+                        onClick={() =>
+                            setIsDesktopCollapsed(
+                                (collapsed) =>
+                                    !collapsed,
+                            )
+                        }
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                        title={
+                            isDesktopCollapsed
+                                ? 'Expandir menu'
+                                : 'Recolher menu'
+                        }
+                        aria-label={
+                            isDesktopCollapsed
+                                ? 'Expandir menu'
+                                : 'Recolher menu'
+                        }
                     >
-                        {isDesktopCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                        {isDesktopCollapsed ? (
+                            <ChevronRight size={20} />
+                        ) : (
+                            <ChevronLeft size={20} />
+                        )}
                     </button>
                 </div>
 
@@ -74,23 +139,25 @@ export function Sidebar() {
                             <NavLink
                                 key={item.label}
                                 to={item.path}
-                                title={isDesktopCollapsed ? item.label : undefined} 
-                                className={({ isActive }) =>
-                                    `flex items-center rounded-xl transition-all duration-200 text-sm font-medium ${
+                                title={
                                     isDesktopCollapsed
-                                        ? 'justify-center w-12 h-12 mx-auto px-0'
-                                        : 'gap-3 px-4 py-3'
-                                    } ${isActive
-                                        ? 'bg-[#A3B18A]/40 text-[#2F4A33]'
-                                        : 'text-[#588157] hover:bg-[#A3B18A]/30'
-                                    }`
+                                        ? item.label
+                                        : undefined
+                                }
+                                className={({ isActive }) =>
+                                    navigationClass(
+                                        isActive,
+                                        isDesktopCollapsed,
+                                    )
                                 }
                             >
-                                <Icon size={19} className="shrink-0" />
+                                <Icon
+                                    size={19}
+                                    className="shrink-0"
+                                />
 
-                                {/* Esconde o texto quando a sidebar estiver recolhida */}
                                 {!isDesktopCollapsed && (
-                                    <span className="truncate whitespace-nowrap transition-opacity duration-300">
+                                    <span className="truncate whitespace-nowrap">
                                         {item.label}
                                     </span>
                                 )}
@@ -100,52 +167,46 @@ export function Sidebar() {
                 </nav>
             </aside>
 
-            {/* HEADER MOBILE */}
-            <header className="fixed left-0 right-0 top-0 z-40 flex h-20 items-center justify-between border-b border-[#A3B18A]/30 bg-[#DAD7CD] px-5 md:hidden">
+            <header className="fixed left-0 right-0 top-0 z-40 flex h-20 items-center justify-between border-b border-slate-800 bg-[#0F172A] px-5 md:hidden">
                 <button
                     type="button"
-                    onClick={() => setIsMobileMenuOpen(true)}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-[#588157] transition-colors hover:bg-[#A3B18A]/30"
+                    onClick={() =>
+                        setIsMobileMenuOpen(true)
+                    }
+                    className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-300 transition-colors hover:bg-slate-800"
                     aria-label="Abrir menu"
                 >
                     <Menu size={23} />
                 </button>
 
-                <img
-                    src={logo}
-                    alt="fLay"
-                    className="h-12 w-auto"
-                />
+                <Brand compact />
 
                 <div className="h-10 w-10" />
             </header>
 
-            {/* OVERLAY MOBILE */}
             {isMobileMenuOpen && (
                 <button
                     type="button"
                     aria-label="Fechar menu"
                     onClick={closeMobileMenu}
-                    className="fixed inset-0 z-50 bg-black/30 md:hidden"
+                    className="fixed inset-0 z-50 bg-slate-950/60 md:hidden"
                 />
             )}
 
-            {/* MENU MOBILE */}
             <aside
-                className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-[#DAD7CD] px-5 py-6 shadow-xl transition-transform duration-300 md:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-[#0F172A] px-5 py-6 shadow-xl transition-transform duration-300 md:hidden ${
+                    isMobileMenuOpen
+                        ? 'translate-x-0'
+                        : '-translate-x-full'
+                }`}
             >
                 <div className="mb-8 flex items-center justify-between">
-                    <img
-                        src={logo}
-                        alt="fLay"
-                        className="h-24 w-auto"
-                    />
+                    <Brand />
 
                     <button
                         type="button"
                         onClick={closeMobileMenu}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-[#588157] transition-colors hover:bg-[#A3B18A]/30"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-300 transition-colors hover:bg-slate-800"
                         aria-label="Fechar menu"
                     >
                         <X size={22} />
@@ -162,10 +223,9 @@ export function Sidebar() {
                                 to={item.path}
                                 onClick={closeMobileMenu}
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive
-                                        ? 'bg-[#A3B18A]/40 text-[#2F4A33]'
-                                        : 'text-[#588157] hover:bg-[#A3B18A]/30'
-                                    }`
+                                    navigationClass(
+                                        isActive,
+                                    )
                                 }
                             >
                                 <Icon size={19} />

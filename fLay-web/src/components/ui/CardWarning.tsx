@@ -52,7 +52,7 @@ export function CardWarning({
 
     return (
         <div
-            className="fixed inset-0 z-[80] flex items-center justify-center bg-[#2F4A33]/30 px-4 py-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-[#0F172A]/30 px-4 py-6 backdrop-blur-sm"
             onMouseDown={(event) => {
                 if (
                     event.target ===
@@ -62,7 +62,7 @@ export function CardWarning({
                 }
             }}
         >
-            <div className="w-full max-w-md overflow-hidden rounded-2xl bg-[#FAF9F6] shadow-2xl">
+            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.10)]">
                 <div className="px-5 pb-5 pt-6 sm:px-6 sm:pt-7">
                     <div className="flex items-start gap-4">
                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500">
@@ -72,11 +72,11 @@ export function CardWarning({
                         </div>
 
                         <div className="min-w-0 flex-1">
-                            <h3 className="text-lg font-semibold text-[#2F4A33]">
+                            <h3 className="text-lg font-semibold text-[#0F172A]">
                                 {title}
                             </h3>
 
-                            <p className="mt-1.5 text-sm leading-5 text-[#588157]">
+                            <p className="mt-1.5 text-sm leading-5 text-[#0F172A]">
                                 {description}
                             </p>
                         </div>
@@ -85,7 +85,7 @@ export function CardWarning({
                             type="button"
                             onClick={handleClose}
                             disabled={isLoading}
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#0F172A] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50"
                             aria-label="Fechar"
                         >
                             <X size={18} />
@@ -95,9 +95,9 @@ export function CardWarning({
                     {(itemTitle ||
                         itemDetails.length >
                         0) && (
-                            <div className="mt-5 rounded-xl border border-[#D8CFBF] bg-[#F1EDE4] px-4 py-3.5">
+                            <div className="mt-5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3.5">
                                 {itemTitle && (
-                                    <p className="truncate text-sm font-semibold text-[#5C5040]">
+                                    <p className="truncate text-sm font-semibold text-[#0F172A]">
                                         {itemTitle}
                                     </p>
                                 )}
@@ -112,7 +112,7 @@ export function CardWarning({
                                                 ) => (
                                                     <span
                                                         key={`${detail}-${index}`}
-                                                        className="rounded-lg bg-white/70 px-2.5 py-1 text-xs font-medium text-[#7A6F5D]"
+                                                        className="rounded-lg bg-white/70 px-2.5 py-1 text-xs font-medium text-[#64748B]"
                                                     >
                                                         {
                                                             detail
@@ -134,12 +134,12 @@ export function CardWarning({
                     )}
                 </div>
 
-                <div className="flex flex-col-reverse gap-2 border-t border-[#A3B18A]/20 bg-white/60 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+                <div className="flex flex-col-reverse gap-2 border-t border-[#E2E8F0] bg-white/60 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
                     <button
                         type="button"
                         onClick={handleClose}
                         disabled={isLoading}
-                        className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                        className="w-full rounded-xl border border-[#E2E8F0]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                     >
                         {cancelLabel}
                     </button>

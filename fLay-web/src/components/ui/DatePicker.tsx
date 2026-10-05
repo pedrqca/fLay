@@ -220,16 +220,16 @@ export function DatePicker({
                 onClick={() =>
                     setIsOpen((open) => !open)
                 }
-                className={`flex w-full items-center justify-between rounded-xl border bg-[#FAF9F6] px-4 py-3 text-sm outline-none transition-colors ${isOpen
-                        ? 'border-[#588157]'
-                        : 'border-[#A3B18A]/40'
+                className={`flex w-full items-center justify-between rounded-xl border bg-[#F8FAFC] px-4 py-3 text-sm outline-none transition-colors focus:ring-4 focus:ring-indigo-500/10 ${isOpen
+                        ? 'border-[#6366F1]'
+                        : 'border-[#CBD5E1]'
                     }`}
             >
                 <span
                     className={
                         value
-                            ? 'text-[#2F4A33]'
-                            : 'text-[#A3B18A]'
+                            ? 'text-[#0F172A]'
+                            : 'text-slate-500'
                     }
                 >
                     {value
@@ -241,19 +241,19 @@ export function DatePicker({
 
                 <CalendarDays
                     size={18}
-                    className="text-[#588157]"
+                    className="text-[#0F172A]"
                 />
             </button>
 
             {isOpen && (
-                <div className="absolute left-0 top-full z-50 mt-2 w-full min-w-[300px] rounded-2xl border border-[#A3B18A]/30 bg-white p-4 shadow-xl">
+                <div className="absolute left-0 top-full z-50 mt-2 w-full min-w-[300px] rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-xl">
                     <div className="mb-4 flex items-center justify-between">
                         <button
                             type="button"
                             onClick={
                                 goToPreviousMonth
                             }
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#0F172A] transition-colors hover:bg-[#EEF2FF]"
                             aria-label="Mês anterior"
                         >
                             <ChevronLeft
@@ -262,7 +262,7 @@ export function DatePicker({
                         </button>
 
                         <div className="text-center">
-                            <p className="text-sm font-semibold text-[#2F4A33]">
+                            <p className="text-sm font-semibold text-[#0F172A]">
                                 {
                                     monthNames[
                                     currentMonth.getMonth()
@@ -270,7 +270,7 @@ export function DatePicker({
                                 }
                             </p>
 
-                            <p className="text-xs text-[#A3B18A]">
+                            <p className="text-xs text-slate-500">
                                 {currentMonth.getFullYear()}
                             </p>
                         </div>
@@ -280,7 +280,7 @@ export function DatePicker({
                             onClick={
                                 goToNextMonth
                             }
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#0F172A] transition-colors hover:bg-[#EEF2FF]"
                             aria-label="Próximo mês"
                         >
                             <ChevronRight
@@ -294,7 +294,7 @@ export function DatePicker({
                             (day, index) => (
                                 <div
                                     key={`${day}-${index}`}
-                                    className="flex h-9 items-center justify-center text-xs font-semibold text-[#A3B18A]"
+                                    className="flex h-9 items-center justify-center text-xs font-semibold text-slate-500"
                                 >
                                     {day}
                                 </div>
@@ -338,10 +338,10 @@ export function DatePicker({
                                             )
                                         }
                                         className={`flex h-9 items-center justify-center rounded-lg text-sm transition-colors ${isSelected
-                                                ? 'bg-[#588157] font-semibold text-white'
+                                                ? 'bg-[#6366F1] font-semibold text-white'
                                                 : isToday
-                                                    ? 'bg-[#A3B18A]/20 font-semibold text-[#588157]'
-                                                    : 'text-[#2F4A33] hover:bg-[#DAD7CD]'
+                                                    ? 'bg-[#EEF2FF] font-semibold text-[#4F46E5]'
+                                                    : 'text-[#0F172A] hover:bg-[#EEF2FF]'
                                             }`}
                                     >
                                         {date.getDate()}
@@ -369,7 +369,7 @@ export function DatePicker({
                                 todayDate,
                             )
                         }}
-                        className="mt-4 w-full rounded-xl bg-[#A3B18A]/15 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#A3B18A]/25"
+                        className="mt-4 w-full rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] py-2.5 text-sm font-medium text-[#475569] transition-colors hover:bg-[#EEF2FF] hover:text-[#4F46E5]"
                     >
                         Hoje
                     </button>

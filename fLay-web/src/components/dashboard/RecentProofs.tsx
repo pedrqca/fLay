@@ -245,11 +245,11 @@ export function RecentProofs({
             <section className="mt-8">
                 <div className="mb-4 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h2 className="text-xl font-semibold tracking-tight text-[#2F4A33]">
+                        <h2 className="text-xl font-semibold tracking-tight text-[#0F172A]">
                             Comprovantes recentes
                         </h2>
 
-                        <p className="mt-1 text-sm text-[#588157]">
+                        <p className="mt-1 text-sm text-[#475569]">
                             Seus últimos comprovantes de ponto.
                         </p>
                     </div>
@@ -259,7 +259,7 @@ export function RecentProofs({
                             type="button"
                             onClick={handleOpenCompensationClick}
                             disabled={isOpeningCompensation}
-                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#A3B18A]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E2E8F0]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
                             <Plus size={17} />
 
@@ -269,7 +269,7 @@ export function RecentProofs({
                         <button
                             type="button"
                             onClick={handleOpenCreateModal}
-                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] sm:w-auto"
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#6366F1] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#4F46E5] sm:w-auto"
                         >
                             <Upload size={17} />
 
@@ -278,7 +278,7 @@ export function RecentProofs({
                     </div>
                 </div>
 
-                <div className="overflow-hidden rounded-2xl border border-[#A3B18A]/30 bg-white">
+                <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
                     {proofs.map(
                         (
                             proof,
@@ -286,24 +286,24 @@ export function RecentProofs({
                         ) => (
                             <article
                                 key={proof.id}
-                                className={`flex flex-col px-4 py-4 sm:px-6 sm:py-5 md:flex-row md:items-center md:justify-between ${index !== proofs.length - 1
-                                    ? 'border-b border-[#A3B18A]/20'
+                                className={`flex flex-col px-4 py-5 transition-colors hover:bg-[#F8FAFC] sm:px-6 sm:py-6 md:flex-row md:items-center md:justify-between ${index !== proofs.length - 1
+                                    ? 'border-b border-[#E2E8F0]'
                                     : ''
                                     }`}
                             >
                                 {/* INFORMAÇÕES DO COMPROVANTE */}
                                 <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-4">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#A3B18A]/20 text-[#588157] sm:h-11 sm:w-11">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EEF2FF] text-[#4F46E5] sm:h-11 sm:w-11">
                                         <FileImage size={20} />
                                     </div>
 
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-semibold text-[#2F4A33]">
+                                        <p className="text-sm font-semibold text-[#0F172A]">
                                             {proof.date}
                                         </p>
 
                                         {/* AQUI: Removido truncate no mobile, adicionado md:truncate e wrap no texto */}
-                                        <p className="mt-1 text-sm leading-relaxed text-[#588157] md:truncate">
+                                        <p className="mt-1 text-sm leading-relaxed text-[#475569] md:truncate">
                                             {formatTimes(proof.times)}
                                         </p>
                                     </div>
@@ -311,13 +311,13 @@ export function RecentProofs({
 
                                 {/* AÇÕES */}
                                 {/* AQUI: Adicionado separação e espaçamento no celular */}
-                                <div className="mt-3 flex shrink-0 items-center justify-end gap-5 border-t border-[#A3B18A]/10 pt-3 md:mt-0 md:w-auto md:gap-4 md:border-0 md:pt-0">
+                                <div className="mt-3 flex shrink-0 items-center justify-end gap-5 border-t border-[#E2E8F0]/10 pt-3 md:mt-0 md:w-auto md:gap-4 md:border-0 md:pt-0">
                                     <button
                                         type="button"
                                         onClick={() =>
                                             handleEditClick(proof)
                                         }
-                                        className="flex items-center gap-1.5 text-sm font-medium text-[#588157] transition-colors hover:text-[#2F4A33]"
+                                        className="flex items-center gap-1.5 text-sm font-medium text-[#475569] transition-colors hover:text-[#0F172A]"
                                     >
                                         <span>Editar</span>
                                         <ArrowUpRight size={16} />
@@ -329,7 +329,7 @@ export function RecentProofs({
                                             handleDeleteClick(proof)
                                         }
                                         disabled={deletingId !== null}
-                                        className="flex items-center gap-1.5 text-sm font-medium text-red-500 transition-colors hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-[#EF4444] transition-colors hover:bg-[#FEF2F2] hover:text-[#EF4444] disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <Trash2 size={16} />
                                         <span>Excluir</span>

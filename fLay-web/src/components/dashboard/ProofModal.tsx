@@ -295,7 +295,7 @@ export function ProofModal({
     return (
         <>
             {/* BACKDROP: Fundo desfocado fixo */}
-            <div className="fixed inset-0 z-50 bg-[#2F4A33]/30 backdrop-blur-sm transition-opacity" />
+            <div className="fixed inset-0 z-50 bg-[#0F172A]/30 backdrop-blur-sm transition-opacity" />
 
             {/* CONTAINER SCROLL: Permite rolagem se o modal ficar muito alto */}
             <div
@@ -313,18 +313,18 @@ export function ProofModal({
                         if (event.target === event.currentTarget) onClose()
                     }}
                 >
-                    <div className="relative w-full max-w-lg transform overflow-visible rounded-2xl bg-[#FAF9F6] text-left shadow-xl transition-all sm:my-8">
+                    <div className="relative w-full max-w-lg transform overflow-visible rounded-2xl border border-[#E2E8F0] bg-white text-left shadow-[0_8px_24px_rgba(15,23,42,0.10)] transition-all sm:my-8">
 
                         {/* HEADER */}
-                        <div className="flex items-start justify-between gap-4 border-b border-[#A3B18A]/30 px-4 py-4 sm:px-6 sm:py-5">
+                        <div className="flex items-start justify-between gap-4 border-b border-[#E2E8F0] px-4 py-4 sm:px-6 sm:py-5">
                             <div className="min-w-0">
-                                <h2 className="text-lg font-semibold text-[#2F4A33] sm:text-xl">
+                                <h2 className="text-lg font-semibold text-[#0F172A] sm:text-xl">
                                     {isEditing
                                         ? 'Editar jornada'
                                         : 'Registrar jornada'}
                                 </h2>
 
-                                <p className="mt-1 text-xs leading-relaxed text-[#588157] sm:text-sm">
+                                <p className="mt-1 text-xs leading-relaxed text-[#475569] sm:text-sm">
                                     {isEditing
                                         ? 'Atualize os registros do seu dia.'
                                         : 'Informe os registros do seu dia.'}
@@ -335,7 +335,7 @@ export function ProofModal({
                                 type="button"
                                 onClick={onClose}
                                 disabled={isSubmitting}
-                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#0F172A] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label="Fechar"
                             >
                                 <X size={20} />
@@ -349,7 +349,7 @@ export function ProofModal({
                         >
                             {/* DATA */}
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-[#2F4A33]">
+                                <label className="mb-2 block text-sm font-medium text-[#0F172A]">
                                     Data
                                 </label>
 
@@ -363,16 +363,16 @@ export function ProofModal({
                             <div>
                                 <div className="mb-3 flex items-end justify-between gap-2">
                                     <div className="min-w-0">
-                                        <label className="block text-sm font-medium text-[#2F4A33]">
+                                        <label className="block text-sm font-medium text-[#0F172A]">
                                             Horários
                                         </label>
 
-                                        <p className="mt-0.5 text-xs leading-relaxed text-[#588157]">
+                                        <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">
                                             Adicione os registros de entrada e saída.
                                         </p>
                                     </div>
 
-                                    <span className="shrink-0 rounded-full bg-[#A3B18A]/15 px-2.5 py-1 text-xs font-medium text-[#588157]">
+                                    <span className="shrink-0 rounded-full bg-[#EEF2FF] px-2.5 py-1 text-xs font-medium text-[#4F46E5]">
                                         {form.times.length} horários
                                     </span>
                                 </div>
@@ -385,7 +385,7 @@ export function ProofModal({
                                                 className="flex items-end gap-2 sm:gap-3"
                                             >
                                                 <div className="min-w-0 flex-1">
-                                                    <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-[#2F4A33]">
+                                                    <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-[#0F172A]">
                                                         <Clock3 size={16} />
                                                         {getTimeLabel(index)}
                                                     </label>
@@ -404,7 +404,7 @@ export function ProofModal({
                                                         type="button"
                                                         disabled={isSubmitting}
                                                         onClick={() => handleRemoveTime(index)}
-                                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#A3B18A]/40 text-[#A3B18A] transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[#A3B18A]/40 disabled:hover:bg-transparent disabled:hover:text-[#A3B18A] sm:h-12 sm:w-12"
+                                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-slate-500 transition-colors hover:border-[#FECACA] hover:bg-[#FEF2F2] hover:text-[#EF4444] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[#E2E8F0] disabled:hover:bg-transparent disabled:hover:text-slate-500 sm:h-12 sm:w-12"
                                                         aria-label={`Remover ${getTimeLabel(index).toLowerCase()}`}
                                                     >
                                                         <Trash2 size={18} />
@@ -420,19 +420,19 @@ export function ProofModal({
                                     type="button"
                                     disabled={isSubmitting}
                                     onClick={handleAddTime}
-                                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#A3B18A]/50 bg-white px-4 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:border-[#588157] hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50 sm:py-3"
+                                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-2.5 text-sm font-medium text-[#475569] transition-colors hover:border-[#C7D2FE] hover:bg-[#EEF2FF] hover:text-[#4F46E5] disabled:cursor-not-allowed disabled:opacity-50 sm:py-3"
                                 >
                                     <Plus size={18} />
                                     Adicionar horário
                                 </button>
 
                                 {/* EXPLICAÇÃO */}
-                                <div className="mt-4 rounded-xl bg-[#A3B18A]/10 px-3 py-3 sm:px-4">
-                                    <p className="text-xs leading-relaxed text-[#588157]">
+                                <div className="mt-4 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-3 sm:px-4">
+                                    <p className="text-xs leading-relaxed text-[#475569]">
                                         Os horários são considerados em pares: <strong>entrada → saída</strong>.
                                     </p>
 
-                                    <p className="mt-1 text-xs leading-relaxed text-[#A3B18A]">
+                                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
                                         Exemplo: 08:00 → 12:00 → 13:30 → 18:00.
                                     </p>
                                 </div>
@@ -451,12 +451,12 @@ export function ProofModal({
                             )}
 
                             {/* ACTIONS */}
-                            <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                            <div className="flex flex-col-reverse gap-2 border-t border-[#E2E8F0] px-4 pb-5 pt-4 sm:flex-row sm:justify-end sm:px-6">
                                 <button
                                     type="button"
                                     onClick={onClose}
                                     disabled={isSubmitting}
-                                    className="w-full rounded-xl border border-[#A3B18A]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#588157] transition-colors hover:bg-[#DAD7CD] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                                    className="w-full rounded-xl border border-[#E2E8F0]/50 bg-white px-5 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                                 >
                                     Cancelar
                                 </button>
@@ -469,7 +469,7 @@ export function ProofModal({
                                         form.times.some((time) => !time) ||
                                         form.times.length % 2 !== 0
                                     }
-                                    className="w-full rounded-xl bg-[#588157] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                                    className="w-full rounded-xl bg-[#6366F1] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#4F46E5] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                                 >
                                     {isSubmitting
                                         ? isEditing

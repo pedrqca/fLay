@@ -26,7 +26,7 @@ function App() {
         }
       />
 
-      <div className="flex min-h-screen bg-[#FAF9F6]">
+      <div className="flex min-h-screen bg-[#F1F5F9]">
         <Sidebar />
 
         <main className="flex-1 min-w-0 w-full overflow-x-hidden pt-20 md:pt-0">

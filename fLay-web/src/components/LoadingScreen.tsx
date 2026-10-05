@@ -110,7 +110,7 @@ export function LoadingScreen({
             role="status"
             aria-live="polite"
             aria-label="Carregando aplicação"
-            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#FAF9F6] transition-opacity ${isFadingOut ? 'opacity-0' : 'opacity-100'
+            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F172A] transition-opacity ${isFadingOut ? 'opacity-0' : 'opacity-100'
                 }`}
             style={{
                 transitionDuration: `${ fadeDuration }ms`,
@@ -118,20 +118,20 @@ export function LoadingScreen({
         >
             <div
                 aria-hidden="true"
-                className="relative flex h-24 w-24 items-center justify-center rounded-full bg-[#A3B18A]/20"
+                className="relative flex h-24 w-24 items-center justify-center rounded-full bg-indigo-500/15"
             >
                 <Hourglass
                     size={40}
-                    className="animate-pulse text-[#2F4A33]"
+                    className="animate-pulse text-[#A855F7]"
                 />
             </div>
 
-            <h1 className="mt-6 text-xl font-semibold tracking-tight text-[#2F4A33]">
-                Carregando...
+            <h1 className="mt-6 text-xl font-semibold tracking-tight text-white">
+                LAYN
             </h1>
 
-            <p className="mt-2 text-sm text-[#588157]">
-                Preparando o seu ambiente
+            <p className="mt-2 text-sm text-slate-300">
+                Seu tempo, em equilíbrio.
             </p>
         </div>
     )

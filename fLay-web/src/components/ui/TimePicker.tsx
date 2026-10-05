@@ -352,10 +352,10 @@ export function TimePicker({
             ref={containerRef}
             className="relative w-full"
         >
-            <div className="flex w-full items-center rounded-xl border border-[#A3B18A]/40 bg-white transition-colors focus-within:border-[#588157] focus-within:ring-2 focus-within:ring-[#A3B18A]/20">
+            <div className="flex w-full items-center rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] transition-colors focus-within:border-[#6366F1] focus-within:ring-4 focus-within:ring-indigo-500/10">
                 <Clock3
                     size={18}
-                    className="ml-4 shrink-0 text-[#588157]"
+                    className="ml-4 shrink-0 text-[#0F172A]"
                 />
 
                 <input
@@ -373,7 +373,7 @@ export function TimePicker({
                         placeholder
                     }
                     maxLength={5}
-                    className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-[#2F4A33] outline-none placeholder:text-[#A3B18A]"
+                    className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-[#0F172A] outline-none placeholder:text-slate-500"
                     aria-label={
                         placeholder
                     }
@@ -382,7 +382,7 @@ export function TimePicker({
                 <button
                     type="button"
                     onClick={handleOpen}
-                    className="mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD]"
+                    className="mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#0F172A] transition-colors hover:bg-[#F8FAFC]"
                     aria-label="Abrir seletor de horário"
                 >
                     <ChevronDown
@@ -398,28 +398,28 @@ export function TimePicker({
 
             {isOpen && (
                 <div
-                    className={`absolute left-0 z-[60] w-full min-w-[300px] rounded-2xl border border-[#A3B18A]/30 bg-white p-5 shadow-xl ${openUpwards
+                    className={`absolute left-0 z-[60] w-full min-w-[300px] rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-xl ${openUpwards
                         ? 'bottom-full mb-2'
                         : 'top-full mt-2'
                         }`}
                 >
                     <div className="mb-4">
-                        <p className="text-sm font-semibold text-[#2F4A33]">
+                        <p className="text-sm font-semibold text-[#0F172A]">
                             Selecionar horário
                         </p>
 
-                        <p className="mt-1 text-xs text-[#588157]">
+                        <p className="mt-1 text-xs text-[#0F172A]">
                             Você também pode digitar, por exemplo, 0802.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#A3B18A]">
+                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
                                 Hora
                             </p>
 
-                            <div className="max-h-48 overflow-y-auto rounded-xl border border-[#A3B18A]/30">
+                            <div className="max-h-48 overflow-y-auto rounded-xl border border-[#E2E8F0]">
                                 {hours.map(
                                     (hour) => (
                                         <button
@@ -434,8 +434,8 @@ export function TimePicker({
                                             }
                                             className={`flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors ${selectedHour ===
                                                 hour
-                                                ? 'bg-[#A3B18A]/20 font-semibold text-[#2F4A33]'
-                                                : 'text-[#588157] hover:bg-[#DAD7CD]'
+                                                ? 'bg-[#EEF2FF] font-semibold text-[#4F46E5]'
+                                                : 'text-[#0F172A] hover:bg-[#F8FAFC]'
                                                 }`}
                                         >
                                             <span>
@@ -459,11 +459,11 @@ export function TimePicker({
                         </div>
 
                         <div>
-                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#A3B18A]">
+                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
                                 Minuto
                             </p>
 
-                            <div className="max-h-48 overflow-y-auto rounded-xl border border-[#A3B18A]/30">
+                            <div className="max-h-48 overflow-y-auto rounded-xl border border-[#E2E8F0]">
                                 {minutes.map(
                                     (
                                         minute,
@@ -480,8 +480,8 @@ export function TimePicker({
                                             }
                                             className={`flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors ${selectedMinute ===
                                                 minute
-                                                ? 'bg-[#A3B18A]/20 font-semibold text-[#2F4A33]'
-                                                : 'text-[#588157] hover:bg-[#DAD7CD]'
+                                                ? 'bg-[#EEF2FF] font-semibold text-[#4F46E5]'
+                                                : 'text-[#0F172A] hover:bg-[#F8FAFC]'
                                                 }`}
                                         >
                                             <span>
@@ -505,10 +505,10 @@ export function TimePicker({
                         </div>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#A3B18A]/20 pt-4">
-                        <p className="text-sm text-[#588157]">
+                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#E2E8F0] pt-4">
+                        <p className="text-sm text-[#0F172A]">
                             Horário:{' '}
-                            <span className="font-semibold text-[#2F4A33]">
+                            <span className="font-semibold text-[#0F172A]">
                                 {selectedHour}:
                                 {
                                     selectedMinute
@@ -521,7 +521,7 @@ export function TimePicker({
                             onClick={
                                 handleConfirm
                             }
-                            className="flex items-center gap-2 rounded-xl bg-[#588157] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2F4A33]"
+                            className="flex items-center gap-2 rounded-xl bg-[#6366F1] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#4F46E5]"
                         >
                             <Check
                                 size={16}

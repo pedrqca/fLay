@@ -46,16 +46,16 @@ export function BankHistory({
     return (
         <section className="mt-8">
             <div className="mb-4">
-                <h2 className="text-xl font-semibold tracking-tight text-[#2F4A33]">
+                <h2 className="text-xl font-semibold tracking-tight text-[#0F172A]">
                     Histórico do banco de horas
                 </h2>
 
-                <p className="mt-1 text-sm text-[#588157]">
+                <p className="mt-1 text-sm text-[#0F172A]">
                     Acompanhe suas horas extras e compensações.
                 </p>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-[#A3B18A]/30 bg-white">
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
                 {transactions.map(
                     (
                         transaction,
@@ -69,15 +69,15 @@ export function BankHistory({
                             <article
                                 key={`${transaction.date}-${transaction.type}-${transaction.minutes}-${index}`}
                                 className={`flex items-center justify-between gap-3 border-b px-4 py-4 last:border-b-0 sm:gap-4 sm:px-6 sm:py-5 ${isExtra
-                                    ? 'border-[#A3B18A]/20 bg-white'
-                                    : 'border-[#D8CFBF] bg-[#F1EDE4]'
+                                    ? 'border-[#E2E8F0] bg-white'
+                                    : 'border-[#E2E8F0] bg-[#F8FAFC]'
                                     }`}
                             >
                                 <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
                                     <div
                                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${isExtra
-                                            ? 'bg-[#A3B18A]/20 text-[#588157]'
-                                            : 'bg-[#DED5C5] text-[#6B5E4A]'
+                                            ? 'bg-green-50 text-[#22C55E]'
+                                            : 'bg-[#E2E8F0] text-[#475569]'
                                             }`}
                                     >
                                         {isExtra ? (
@@ -94,8 +94,8 @@ export function BankHistory({
                                     <div className="min-w-0">
                                         <p
                                             className={`truncate text-sm font-semibold ${isExtra
-                                                ? 'text-[#2F4A33]'
-                                                : 'text-[#5C5040]'
+                                                ? 'text-[#0F172A]'
+                                                : 'text-[#0F172A]'
                                                 }`}
                                         >
                                             {
@@ -105,8 +105,8 @@ export function BankHistory({
 
                                         <p
                                             className={`mt-1 text-sm ${isExtra
-                                                ? 'text-[#588157]'
-                                                : 'text-[#7A6F5D]'
+                                                ? 'text-[#64748B]'
+                                                : 'text-[#64748B]'
                                                 }`}
                                         >
                                             {formatDateForDisplay(
@@ -119,8 +119,8 @@ export function BankHistory({
                                 <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                                     <p
                                         className={`text-sm font-semibold ${isExtra
-                                            ? 'text-[#588157]'
-                                            : 'text-[#6B5E4A]'
+                                            ? 'text-[#22C55E]'
+                                            : 'text-[#475569]'
                                             }`}
                                     >
                                         {isExtra
@@ -143,7 +143,7 @@ export function BankHistory({
                                                         transaction,
                                                     )
                                                 }
-                                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#588157] transition-colors hover:bg-[#DAD7CD] hover:text-[#2F4A33] sm:h-10 sm:w-10"
+                                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#0F172A] transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A] sm:h-10 sm:w-10"
                                                 aria-label="Editar compensação"
                                                 title="Editar compensação"
                                             >
@@ -159,7 +159,7 @@ export function BankHistory({
                                                         transaction,
                                                     )
                                                 }
-                                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#7A6F5D] transition-colors hover:bg-[#DED5C5] hover:text-[#5C5040] sm:h-10 sm:w-10"
+                                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#64748B] transition-colors hover:bg-[#E2E8F0] hover:text-[#0F172A] sm:h-10 sm:w-10"
                                                 aria-label="Excluir compensação"
                                                 title="Excluir compensação"
                                             >
@@ -178,7 +178,7 @@ export function BankHistory({
                 {transactions.length ===
                     0 && (
                         <div className="px-6 py-10 text-center">
-                            <p className="text-sm text-[#7A6F5D]">
+                            <p className="text-sm text-[#64748B]">
                                 Nenhuma movimentação registrada.
                             </p>
                         </div>

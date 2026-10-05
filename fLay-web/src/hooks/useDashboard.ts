@@ -1,7 +1,6 @@
 import {
     useCallback,
     useEffect,
-    useRef,
     useState,
 } from 'react'
 
@@ -58,8 +57,10 @@ export function useDashboard(): DashboardData {
         isLoading,
         setIsLoading,
     ] = useState(true)
-    const hasLoadedOnceRef =
-        useRef(false)
+    const [
+        isInitialLoading,
+        setIsInitialLoading,
+    ] = useState(true)
 
     const loadDashboardData =
         useCallback(
@@ -90,8 +91,7 @@ export function useDashboard(): DashboardData {
 
                     throw loadError
                 } finally {
-                    hasLoadedOnceRef.current =
-                        true
+                    setIsInitialLoading(false)
                     setIsLoading(false)
                 }
             },
@@ -116,9 +116,7 @@ export function useDashboard(): DashboardData {
         bankTransactions,
         error,
         isLoading,
-        isInitialLoading:
-            isLoading &&
-            !hasLoadedOnceRef.current,
+        isInitialLoading,
         loadDashboardData,
     }
 }

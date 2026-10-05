@@ -1,6 +1,6 @@
-# fLay
+# LAYN
 
-O **fLay** é um sistema para **controle de jornada e banco de horas**, desenvolvido para facilitar o registro, acompanhamento e gerenciamento das horas trabalhadas.
+O **LAYN** é um sistema para **controle de jornada e banco de horas**, desenvolvido para facilitar o registro, acompanhamento e gerenciamento das horas trabalhadas.
 
 ## Funcionalidades
 
@@ -50,4 +50,4 @@ O **fLay** é um sistema para **controle de jornada e banco de horas**, desenvol
 
 ## 🎯 Objetivo
 
-O fLay tem como objetivo centralizar o **controle de jornada, banco de horas, compensações e comprovantes** em um único sistema, tornando o acompanhamento das horas trabalhadas mais simples e organizado.
+O LAYN tem como objetivo centralizar o **controle de jornada, banco de horas, compensações e comprovantes** em um único sistema, tornando o acompanhamento das horas trabalhadas mais simples e organizado.
