@@ -1,4 +1,4 @@
-import type { BankTransaction } from '../utils/bankCalculator.js'
+import type { BankTransaction } from './bankCalculator.js'
 
 interface CompensationInput {
     date: string
