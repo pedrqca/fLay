@@ -183,7 +183,8 @@ export function ProofModal({
             ...currentForm,
             times: [
                 ...currentForm.times,
-                '',
+                '', 
+                '', 
             ],
         }))
 
@@ -197,6 +198,8 @@ export function ProofModal({
             return
         }
 
+        const startIndex = index % 2 === 0 ? index : index - 1
+
         setForm((currentForm) => ({
             ...currentForm,
             times: currentForm.times.filter(
@@ -204,7 +207,8 @@ export function ProofModal({
                     _,
                     currentIndex,
                 ) =>
-                    currentIndex !== index,
+                    
+                    currentIndex !== startIndex && currentIndex !== startIndex + 1,
             ),
         }))
 
