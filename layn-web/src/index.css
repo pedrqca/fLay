@@ -1,5 +1,88 @@
 @import "tailwindcss";
 
+@theme {
+  /* Definição das classes de animação */
+  --animate-layn-drop: layn-drop 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-layn-slide: layn-slide 700ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+  --animate-layn-float: layn-float 3.6s ease-in-out 900ms infinite;
+  --animate-layn-glow: layn-glow 3.6s ease-in-out infinite;
+  --animate-layn-rise: layn-rise 600ms ease-out both;
+  --animate-layn-bar: layn-bar 1.6s ease-in-out infinite;
+
+  /* Keyframes das animações */
+  @keyframes layn-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(-60px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes layn-slide {
+    0% {
+      opacity: 0;
+      transform: translateX(60px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes layn-float {
+
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+
+    50% {
+      transform: translateY(-8px) scale(1.04);
+    }
+  }
+
+  @keyframes layn-glow {
+
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: scale(0.9);
+    }
+
+    50% {
+      opacity: 0.75;
+      transform: scale(1.15);
+    }
+  }
+
+  @keyframes layn-rise {
+    0% {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes layn-bar {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(250%);
+    }
+  }
+}
+
 :root {
   font-family: Inter, system-ui, sans-serif;
   color: #0f172a;
@@ -15,31 +98,4 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: #f1f5f9;
-}
-
-/* Animação personalizada da Ampulheta */
-@keyframes flipHourglass {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  40% {
-    transform: rotate(180deg);
-  }
-
-  50% {
-    transform: rotate(180deg);
-  }
-
-  90% {
-    transform: rotate(360deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-flip-hourglass {
-  animation: flipHourglass 2s ease-in-out infinite;
 }
