@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { StatCard } from '../components/dashboard/StatCard'
 import { RecentProofs } from '../components/dashboard/RecentProofs'
 import { BankHistory } from '../components/dashboard/BankHistory'
+import type { ProofData } from '../components/dashboard/ProofModal'
+import type { CompensationToEdit } from '../components/dashboard/CompensationModal'
 import { CardWarning } from '../components/ui/CardWarning'
 
 import type { BankTransaction } from '../types/bankTransaction'
@@ -25,8 +27,8 @@ import {
 } from '../utils/workdayMapper'
 
 import type { DashboardData } from '../hooks/useDashboard'
-import { useCompensation } from '../hooks/useCompensation'
-import { useWorkday } from '../hooks/useWorkday'
+import { useCompensationActions } from '../hooks/useCompensationActions'
+import { useProofActions } from '../hooks/useProofActions'
 
 export function Dashboard({
     workdays,
@@ -41,25 +43,29 @@ export function Dashboard({
     ] = useState(false)
 
     const {
-        editingCompensation,
-        compensationToDelete,
         isDeletingCompensation,
-
-        handleCompensationSubmit,
-        handleEditCompensation,
-        handleDeleteCompensation,
-        handleCloseDeleteCompensation,
-        handleConfirmDeleteCompensation,
-        clearEditingCompensation,
-    } = useCompensation(
-        bankTransactionsFromApi,
+        handleSubmitCompensation: submitCompensation,
+        handleConfirmDeleteCompensation:
+            confirmDeleteCompensation,
+    } = useCompensationActions(
         loadDashboardData,
     )
 
+    const [
+        editingCompensation,
+        setEditingCompensation,
+    ] = useState<CompensationToEdit | null>(null)
+
+    const [
+        compensationToDelete,
+        setCompensationToDelete,
+    ] = useState<BankTransaction | null>(null)
+
     const {
-        handleProofSubmit,
-        handleDeleteWorkday,
-    } = useWorkday(loadDashboardData)
+        handleSubmitProof: submitProof,
+        handleConfirmDeleteWorkday:
+            confirmDeleteWorkday,
+    } = useProofActions(loadDashboardData)
 
     if (error) {
         return (
@@ -100,33 +106,127 @@ export function Dashboard({
     async function handleSubmitCompensation(
         data: CompensationData,
     ) {
-        try {
-            await handleCompensationSubmit(data)
+        const succeeded =
+            await submitCompensation(
+                data,
+                editingCompensation,
+            )
 
+        if (succeeded) {
             setIsCompensationModalOpen(false)
-        } catch (error) {
-            console.error(
-                'Erro ao salvar compensação:',
-                error,
+            setEditingCompensation(null)
+        }
+    }
+
+    async function handleProofSubmit(
+        data: ProofData,
+        workdayId?: number,
+    ) {
+        const succeeded =
+            await submitProof(
+                data,
+                workdayId ?? null,
+            )
+
+        if (!succeeded) {
+            throw new Error(
+                'Não foi possível salvar a jornada.',
+            )
+        }
+    }
+
+    async function handleDeleteWorkday(
+        workdayId: number,
+    ) {
+        const succeeded =
+            await confirmDeleteWorkday(
+                workdayId,
+            )
+
+        if (!succeeded) {
+            throw new Error(
+                'Não foi possível excluir a jornada.',
             )
         }
     }
 
     function handleOpenNewCompensation() {
-        clearEditingCompensation()
+        setEditingCompensation(null)
         setIsCompensationModalOpen(true)
     }
 
     function handleCloseCompensation() {
         setIsCompensationModalOpen(false)
-        clearEditingCompensation()
+        setEditingCompensation(null)
     }
 
     function handleEditCompensationAndOpenModal(
         transaction: BankTransaction,
     ) {
-        handleEditCompensation(transaction)
+        const apiTransaction =
+            bankTransactionsFromApi.find(
+                (item) =>
+                    item.id === transaction.id &&
+                    item.type === 'COMPENSATION',
+            )
+
+        if (!apiTransaction) {
+            console.error(
+                'Não foi possível localizar a compensação.',
+            )
+            return
+        }
+
+        setEditingCompensation({
+            id: apiTransaction.id,
+            date: apiTransaction.date,
+            minutes: apiTransaction.minutes,
+            description: apiTransaction.description,
+        })
         setIsCompensationModalOpen(true)
+    }
+
+    function handleDeleteCompensation(
+        transaction: BankTransaction,
+    ) {
+        const apiTransaction =
+            bankTransactionsFromApi.find(
+                (item) =>
+                    item.id === transaction.id &&
+                    item.type === 'COMPENSATION',
+            )
+
+        if (!apiTransaction) {
+            console.error(
+                'Não foi possível localizar a compensação.',
+            )
+            return
+        }
+
+        setCompensationToDelete(apiTransaction)
+    }
+
+    function handleCloseDeleteCompensation() {
+        if (isDeletingCompensation) {
+            return
+        }
+
+        setCompensationToDelete(null)
+    }
+
+    async function handleConfirmDeleteCompensation() {
+        if (!compensationToDelete) {
+            return
+        }
+
+        const succeeded =
+            await confirmDeleteCompensation(
+                compensationToDelete.id,
+            )
+
+        if (succeeded) {
+            setCompensationToDelete(null)
+        }
     }
 
     return (

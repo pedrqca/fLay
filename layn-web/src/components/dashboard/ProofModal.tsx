@@ -12,6 +12,7 @@ import {
 
 import { DatePicker } from '../ui/DatePicker'
 import { TimePicker } from '../ui/TimePicker'
+import { LaynLoader } from '../ui/LaynLoader'
 
 export interface ProofData {
     date: string
@@ -31,6 +32,8 @@ const initialForm: ProofData = {
     date: '',
     times: ['', ''],
 }
+
+const MIN_SUBMIT_FEEDBACK_MS = 900
 
 function normalizeDate(
     date: string,
@@ -183,8 +186,8 @@ export function ProofModal({
             ...currentForm,
             times: [
                 ...currentForm.times,
-                '', 
-                '', 
+                '',
+                '',
             ],
         }))
 
@@ -207,7 +210,7 @@ export function ProofModal({
                     _,
                     currentIndex,
                 ) =>
-                    
+
                     currentIndex !== startIndex && currentIndex !== startIndex + 1,
             ),
         }))
@@ -264,7 +267,10 @@ export function ProofModal({
         setIsSubmitting(true)
 
         try {
-            await onSubmit(data)
+            await Promise.all([
+                onSubmit(data),
+                new Promise((resolve) => setTimeout(resolve, MIN_SUBMIT_FEEDBACK_MS)),
+            ])
         } catch (err) {
             console.error('Erro ao salvar jornada:', err)
             setError(
@@ -318,6 +324,21 @@ export function ProofModal({
                     }}
                 >
                     <div className="relative w-full max-w-lg transform overflow-visible rounded-2xl border border-[#E2E8F0] bg-white text-left shadow-[0_8px_24px_rgba(15,23,42,0.10)] transition-all sm:my-8">
+
+                        {/* LOADING OVERLAY */}
+                        {isSubmitting && (
+                            <div
+                                role="status"
+                                aria-live="polite"
+                                className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/90 backdrop-blur-sm animate-layn-fade motion-reduce:animate-none"
+                            >
+                                <LaynLoader className="h-40 w-40" />
+
+                                <p className="text-sm font-medium text-[#475569]">
+                                    {isEditing ? 'Salvando alterações...' : 'Registrando jornada...'}
+                                </p>
+                            </div>
+                        )}
 
                         {/* HEADER */}
                         <div className="flex items-start justify-between gap-4 border-b border-[#E2E8F0] px-4 py-4 sm:px-6 sm:py-5">

@@ -16,8 +16,12 @@ export function calculateWeek(
             (weekday) => {
                 const result: WorkdayResult =
                     calculateWorkday(
-                        weekday.times,
-                        weekday.expectedMinutes,
+                        {
+                            times:
+                                weekday.times,
+                            expectedMinutes:
+                                weekday.expectedMinutes,
+                        },
                     )
 
                 return {
@@ -66,13 +70,47 @@ export function calculateWeek(
     }
 }
 
-function calculateWorkday(
-    times: string[],
-    expectedMinutes: number,
-): WorkdayResult {
+export function parseTimeToMinutes(
+    time: string,
+): number {
+    const pattern =
+        /^([01]\d|2[0-3]):([0-5]\d)$/
+
+    if (!pattern.test(time)) {
+        throw new Error(
+            `Horário inválido: "${time}". Use o formato HH:mm.`,
+        )
+    }
+
+    const [
+        hours,
+        minutes,
+    ] = time
+        .split(':')
+        .map(Number)
+
+    return (
+        hours * 60 +
+        minutes
+    )
+}
+
+export function calculateWorkday({
+    times,
+    expectedMinutes,
+}: {
+    times: string[]
+    expectedMinutes: number
+}): WorkdayResult {
+    if (times.length % 2 !== 0) {
+        throw new Error(
+            'Uma jornada precisa possuir uma quantidade par de horários.',
+        )
+    }
+
     const minutes =
         times.map(
-            timeToMinutes,
+            parseTimeToMinutes,
         )
 
     let workedMinutes = 0
@@ -145,100 +183,17 @@ function calculateWorkday(
     }
 }
 
-function timeToMinutes(
-    time: string,
-): number {
-    const pattern =
-        /^([01]\d|2[0-3]):([0-5]\d)$/
-
-    if (!pattern.test(time)) {
-        throw new Error(
-            `Horário inválido: "${time}".Use o formato HH: mm.`,
-        )
-    }
-
-    const [
-        hours,
-        minutes,
-    ] = time
-        .split(':')
-        .map(Number)
-
-    return (
-        hours * 60 +
-        minutes
-    )
-}
-
-export function calculateWorkdayMinutes(
-    times: string[],
-): number {
-    let totalMinutes = 0
-
-    for (
-        let index = 0;
-        index < times.length;
-        index += 2
-    ) {
-        const entry =
-            times[index]
-
-        const exit =
-            times[index + 1]
-
-        if (
-            !entry ||
-            !exit
-        ) {
-            continue
-        }
-
-        const [
-            entryHours,
-            entryMinutes,
-        ] = entry
-            .split(':')
-            .map(Number)
-
-        const [
-            exitHours,
-            exitMinutes,
-        ] = exit
-            .split(':')
-            .map(Number)
-
-        const entryTotal =
-            entryHours * 60 +
-            entryMinutes
-
-        const exitTotal =
-            exitHours * 60 +
-            exitMinutes
-
-        totalMinutes +=
-            exitTotal -
-            entryTotal
-    }
-
-    return totalMinutes
-}
-
 export function calculateWorkdayBalance(
     date: string,
     times: string[],
 ): number {
-    const workedMinutes =
-        calculateWorkdayMinutes(
-            times,
-        )
-
     const expectedMinutes =
         getExpectedMinutes(
             date,
         )
 
-    return (
-        workedMinutes -
-        expectedMinutes
-    )
+    return calculateWorkday({
+        times,
+        expectedMinutes,
+    }).balanceMinutes
 }

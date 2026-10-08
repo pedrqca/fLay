@@ -15,7 +15,7 @@ import {
 } from './date'
 
 import {
-    calculateWorkdayMinutes,
+    calculateWorkday,
 } from './workdayCalculator'
 
 export interface WeeklySummary {
@@ -84,12 +84,14 @@ export function calculateWeeklyHistory(
             createSummary(workday.date)
 
         summary.totalWorkedMinutes +=
-            calculateWorkdayMinutes(
-                workday.timeEntries.map(
-                    (timeEntry) =>
-                        timeEntry.time,
-                ),
-            )
+            calculateWorkday({
+                times:
+                    workday.timeEntries.map(
+                        (timeEntry) =>
+                            timeEntry.time,
+                    ),
+                expectedMinutes: 0,
+            }).workedMinutes
 
         summaries.set(weekKey, summary)
     }

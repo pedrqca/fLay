@@ -7,7 +7,6 @@ import {
 } from 'lucide-react'
 
 import {
-    useEffect,
     useState,
 } from 'react'
 
@@ -18,25 +17,10 @@ import {
 
 import {
     CompensationModal,
-    type CompensationData,
     type CompensationToEdit,
 } from '../components/dashboard/CompensationModal'
 
 import { CardWarning } from '../components/ui/CardWarning'
-
-import {
-    getWorkdays,
-    createWorkday,
-    updateWorkday,
-    deleteWorkday,
-} from '../api/workdays'
-
-import {
-    getBankTransactions,
-    createBankTransaction,
-    updateBankTransaction,
-    deleteBankTransaction,
-} from '../api/bankTransactions'
 
 import type {
     Workday,
@@ -46,188 +30,49 @@ import type {
     BankTransaction,
 } from '../types/bankTransaction'
 
+import type {
+    CompensationData,
+} from '../types/compensation'
+
 import {
     formatDate,
     getDateKey,
-    getExpectedMinutes,
-    parseCivilDate,
 } from '../utils/date'
 
 import {
-    convertHoursToMinutes,
     formatMinutesLong,
 } from '../utils/time'
 
-import {
-    calculateWorkdayBalance,
-} from '../utils/workdayCalculator'
-
-import { useAuth } from '../hooks/useAuth'
-
-interface ProofListItem {
-    id: string
-    date: string
-
-    type:
-    | 'WORKDAY'
-    | 'COMPENSATION'
-
-    workdayId?: number
-    transactionId?: number
-
-    title: string
-    description: string
-    times?: string[]
-    minutes?: number
-
-    transactionType?:
-    | 'EXTRA'
-    | 'COMPENSATION'
-}
-
-function buildProofList(
-    workdays: Workday[],
-    transactions: BankTransaction[],
-): ProofListItem[] {
-    const workdayItems =
-        workdays.map(
-            (workday) => {
-                const date =
-                    getDateKey(
-                        workday.date,
-                    )
-
-                const times =
-                    workday.timeEntries.map(
-                        (entry) =>
-                            entry.time,
-                    )
-
-                const balance =
-                    calculateWorkdayBalance(
-                        date,
-                        times,
-                    )
-
-                const transaction =
-                    transactions.find(
-                        (item) =>
-                            item.workdayId ===
-                            workday.id,
-                    )
-
-                return {
-                    id: `workday - ${ workday.id } `,
-                    date,
-                    type: 'WORKDAY' as const,
-
-                    workdayId:
-                        workday.id,
-
-                    transactionId:
-                        transaction?.id,
-
-                    title:
-                        'Jornada registrada',
-
-                    description:
-                        transaction?.description ??
-                        'Registro de ponto',
-
-                    times,
-
-                    minutes:
-                        balance,
-
-                    transactionType:
-                        transaction?.type,
-                }
-            },
-        )
-
-    const compensationItems =
-        transactions
-            .filter(
-                (
-                    transaction,
-                ) =>
-                    transaction.workdayId ===
-                    null &&
-                    transaction.type ===
-                    'COMPENSATION',
-            )
-            .map(
-                (
-                    transaction,
-                ) => ({
-                    id: `compensation - ${ transaction.id } `,
-
-                    date: getDateKey(
-                        transaction.date,
-                    ),
-
-                    type:
-                        'COMPENSATION' as const,
-
-                    transactionId:
-                        transaction.id,
-
-                    title:
-                        'Compensação',
-
-                    description:
-                        transaction.description,
-
-                    minutes:
-                        transaction.minutes,
-
-                    transactionType:
-                        'COMPENSATION' as const,
-                }),
-            )
-
-    return [
-        ...workdayItems,
-        ...compensationItems,
-    ].sort(
-        (a, b) =>
-            parseCivilDate(
-                b.date,
-            ).getTime() -
-            parseCivilDate(
-                a.date,
-            ).getTime(),
-    )
-}
+import { useCompensationActions } from '../hooks/useCompensationActions'
+import { useProofActions } from '../hooks/useProofActions'
+import { useProofsData } from '../hooks/useProofsData'
+import { buildProofList } from '../utils/proofListBuilder'
 
 export function Proofs() {
     const {
-        userId,
-    } = useAuth()
-
-    const [
         workdays,
-        setWorkdays,
-    ] = useState<Workday[]>(
-        [],
-    )
-
-    const [
         transactions,
-        setTransactions,
-    ] = useState<
-        BankTransaction[]
-    >([])
-
-    const [
         isLoading,
-        setIsLoading,
-    ] = useState(true)
+        error: dataError,
+        refresh,
+    } = useProofsData()
 
-    const [
-        isSaving,
-        setIsSaving,
-    ] = useState(false)
+    const {
+        error: proofError,
+        isSaving: isSavingProof,
+        isDeletingWorkday,
+        handleSubmitProof: submitProof,
+        handleConfirmDeleteWorkday: confirmDeleteWorkday,
+    } = useProofActions(refresh)
+
+    const {
+        error: compensationError,
+        isSaving: isSavingCompensation,
+        isDeletingCompensation,
+        handleSubmitCompensation: submitCompensation,
+        handleConfirmDeleteCompensation:
+            confirmDeleteCompensation,
+    } = useCompensationActions(refresh)
 
     const [
         isProofModalOpen,
@@ -268,69 +113,20 @@ export function Proofs() {
     >(null)
 
     const [
-        isDeletingWorkday,
-        setIsDeletingWorkday,
-    ] = useState(false)
-
-    const [
         compensationToDelete,
         setCompensationToDelete,
     ] = useState<
         BankTransaction | null
     >(null)
 
-    const [
-        isDeletingCompensation,
-        setIsDeletingCompensation,
-    ] = useState(false)
+    const isSaving =
+        isSavingProof ||
+        isSavingCompensation
 
-    const [
-        errorMessage,
-        setErrorMessage,
-    ] = useState('')
-
-    async function loadData() {
-        try {
-            setIsLoading(true)
-            setErrorMessage('')
-
-            const [
-                workdaysData,
-                transactionsData,
-            ] = await Promise.all([
-                getWorkdays(userId),
-                getBankTransactions(
-                    userId,
-                ),
-            ])
-
-            setWorkdays(
-                workdaysData,
-            )
-
-            setTransactions(
-                transactionsData,
-            )
-        } catch (error) {
-            if (
-                error instanceof Error
-            ) {
-                setErrorMessage(
-                    error.message,
-                )
-            } else {
-                setErrorMessage(
-                    'Não foi possível carregar os comprovantes.',
-                )
-            }
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        loadData()
-    }, [])
+    const errorMessage =
+        dataError ||
+        proofError ||
+        compensationError
 
     // ==========================================
     // JORNADA
@@ -396,71 +192,19 @@ export function Proofs() {
     async function handleSubmitProof(
         data: ProofData,
     ) {
-        try {
-            setIsSaving(true)
-            setErrorMessage('')
+        const succeeded =
+            await submitProof(
+            data,
+            editingWorkdayId,
+        )
 
-            const expectedMinutes =
-                getExpectedMinutes(
-                    data.date,
-                )
-
-            const proofs =
-                data.times.map(
-                    (time) => ({
-                        date: data.date,
-                        time,
-                    }),
-                )
-
-            if (
-                editingWorkdayId !==
-                null
-            ) {
-                await updateWorkday(
-                    editingWorkdayId,
-                    {
-                        expectedMinutes,
-                        proofs,
-                    },
-                )
-            } else {
-                await createWorkday({
-                    userId,
-                    expectedMinutes,
-                    proofs,
-                })
-            }
-
-            setIsProofModalOpen(
-                false,
-            )
-
-            setEditingProof(
-                undefined,
-            )
-
-            setEditingWorkdayId(null)
-
-            await loadData()
-        } catch (error) {
-            if (
-                error instanceof Error
-            ) {
-                setErrorMessage(
-                    error.message,
-                )
-            } else {
-                setErrorMessage(
-                    editingWorkdayId !==
-                        null
-                        ? 'Não foi possível atualizar a jornada.'
-                        : 'Não foi possível registrar a jornada.',
-                )
-            }
-        } finally {
-            setIsSaving(false)
+        if (!succeeded) {
+            return
         }
+
+        setIsProofModalOpen(false)
+        setEditingProof(undefined)
+        setEditingWorkdayId(null)
     }
 
     function handleDeleteProof(
@@ -495,36 +239,13 @@ export function Proofs() {
             return
         }
 
-        try {
-            setIsDeletingWorkday(
-                true,
-            )
-
-            setErrorMessage('')
-
-            await deleteWorkday(
+        const succeeded =
+            await confirmDeleteWorkday(
                 workdayToDelete.id,
             )
 
-            await loadData()
-
+        if (succeeded) {
             setWorkdayToDelete(null)
-        } catch (error) {
-            if (
-                error instanceof Error
-            ) {
-                setErrorMessage(
-                    error.message,
-                )
-            } else {
-                setErrorMessage(
-                    'Não foi possível excluir a jornada.',
-                )
-            }
-        } finally {
-            setIsDeletingWorkday(
-                false,
-            )
         }
     }
 
@@ -592,93 +313,18 @@ export function Proofs() {
     async function handleSubmitCompensation(
         data: CompensationData,
     ) {
-        try {
-            setIsSaving(true)
-            setErrorMessage('')
+        const succeeded =
+            await submitCompensation(
+            data,
+            editingCompensation,
+        )
 
-            const minutes =
-                convertHoursToMinutes(
-                    data.hours,
-                )
-
-            if (minutes <= 0) {
-                setErrorMessage(
-                    'Informe uma quantidade de horas válida para a compensação.',
-                )
-
-                return
-            }
-
-            if (!data.date) {
-                setErrorMessage(
-                    'Informe a data da compensação.',
-                )
-
-                return
-            }
-
-            if (
-                !data.description.trim()
-            ) {
-                setErrorMessage(
-                    'Informe uma descrição para a compensação.',
-                )
-
-                return
-            }
-
-            if (
-                editingCompensation
-            ) {
-                await updateBankTransaction(
-                    editingCompensation.id,
-                    {
-                        date: data.date,
-                        type: 'COMPENSATION',
-                        minutes,
-                        description:
-                            data.description.trim(),
-                    },
-                )
-            } else {
-                await createBankTransaction(
-                    {
-                        userId,
-                        date: data.date,
-                        type: 'COMPENSATION',
-                        minutes,
-                        description:
-                            data.description.trim(),
-                    },
-                )
-            }
-
-            setIsCompensationModalOpen(
-                false,
-            )
-
-            setEditingCompensation(
-                null,
-            )
-
-            await loadData()
-        } catch (error) {
-            if (
-                error instanceof Error
-            ) {
-                setErrorMessage(
-                    error.message,
-                )
-            } else {
-                setErrorMessage(
-                    editingCompensation
-                        ? 'Não foi possível atualizar a compensação.'
-                        : 'Não foi possível registrar a compensação.',
-                )
-            }
-        } finally {
-            setIsSaving(false)
+        if (!succeeded) {
+            return
         }
+
+        setIsCompensationModalOpen(false)
+        setEditingCompensation(null)
     }
 
     function handleDeleteCompensation(
@@ -719,38 +365,13 @@ export function Proofs() {
             return
         }
 
-        try {
-            setIsDeletingCompensation(
-                true,
-            )
-
-            setErrorMessage('')
-
-            await deleteBankTransaction(
+        const succeeded =
+            await confirmDeleteCompensation(
                 compensationToDelete.id,
             )
 
-            await loadData()
-
-            setCompensationToDelete(
-                null,
-            )
-        } catch (error) {
-            if (
-                error instanceof Error
-            ) {
-                setErrorMessage(
-                    error.message,
-                )
-            } else {
-                setErrorMessage(
-                    'Não foi possível excluir a compensação.',
-                )
-            }
-        } finally {
-            setIsDeletingCompensation(
-                false,
-            )
+        if (succeeded) {
+            setCompensationToDelete(null)
         }
     }
 
@@ -964,7 +585,7 @@ export function Proofs() {
                                                             ) : (
                                                                 <>
                                                                     <p
-                                                                        className={`text - sm font - semibold ${
+                                                                        className={`text-sm font-semibold ${
     isPositive
         ? 'text-[#0F172A]'
         : 'text-[#B45353]'

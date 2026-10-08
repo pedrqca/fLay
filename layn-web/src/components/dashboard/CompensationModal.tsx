@@ -3,12 +3,11 @@ import { useEffect, useState } from 'react'
 
 import { DatePicker } from '../ui/DatePicker'
 import { TimePicker } from '../ui/TimePicker'
+import { LaynLoader } from '../ui/LaynLoader'
 
-export interface CompensationData {
-    date: string
-    hours: string
-    description: string
-}
+import type { CompensationData } from '../../types/compensation'
+
+export type { CompensationData } from '../../types/compensation'
 
 export interface CompensationToEdit {
     id: number
@@ -25,6 +24,8 @@ interface CompensationModalProps {
     ) => Promise<void>
     editingTransaction?: CompensationToEdit | null
 }
+
+const MIN_SUBMIT_FEEDBACK_MS = 900
 
 function formatDateForInput(
     date: string,
@@ -133,11 +134,14 @@ export function CompensationModal({
         try {
             setIsSubmitting(true)
 
-            await onSubmit({
-                date,
-                hours,
-                description,
-            })
+            await Promise.all([
+                onSubmit({
+                    date,
+                    hours,
+                    description,
+                }),
+                new Promise((resolve) => setTimeout(resolve, MIN_SUBMIT_FEEDBACK_MS)),
+            ])
         } finally {
             setIsSubmitting(false)
         }
@@ -173,6 +177,21 @@ export function CompensationModal({
                     }}
                 >
                     <div className="relative w-full max-w-md transform overflow-visible rounded-2xl border border-[#E2E8F0] bg-white p-5 text-left shadow-[0_8px_24px_rgba(15,23,42,0.10)] transition-all sm:my-8 sm:p-6">
+
+                        {/* LOADING OVERLAY */}
+                        {isSubmitting && (
+                            <div
+                                role="status"
+                                aria-live="polite"
+                                className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/90 backdrop-blur-sm animate-layn-fade motion-reduce:animate-none"
+                            >
+                                <LaynLoader className="h-40 w-40" />
+
+                                <p className="text-sm font-medium text-[#475569]">
+                                    {isEditing ? 'Salvando alterações...' : 'Registrando compensação...'}
+                                </p>
+                            </div>
+                        )}
 
                         {/* HEADER */}
                         <div className="mb-6 flex items-start justify-between gap-4 border-b border-[#E2E8F0] pb-5">

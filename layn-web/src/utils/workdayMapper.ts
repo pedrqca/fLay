@@ -30,28 +30,6 @@ export function mapWorkdaysToWeekdays(
                     timeEntry.time,
             )
 
-        if (
-            times.length === 0 ||
-            times.length % 2 !== 0
-        ) {
-            console.warn(
-                `A jornada de ${formatDate(workday.date)} possui uma quantidade inválida de registros de horário.`,
-            )
-
-            return {
-                date: formatDate(workday.date),
-                day: getDayName(workday.date),
-                times: [
-                    '00:00',
-                    '00:00',
-                ],
-                expectedMinutes:
-                    getExpectedMinutes(
-                        workday.date,
-                    ),
-            }
-        }
-
         return {
             date: formatDate(workday.date),
             day: getDayName(workday.date),

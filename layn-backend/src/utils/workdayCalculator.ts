@@ -83,7 +83,7 @@ export function getExpectedMinutes(
     return 480
 }
 
-function timeToMinutes(
+export function parseTimeToMinutes(
     time: string,
 ): number {
     const timePattern =
@@ -120,17 +120,14 @@ export function calculateWorkday({
     times,
     expectedMinutes,
 }: WorkdayInput): WorkdayResult {
-    if (
-        times.length === 0 ||
-        times.length % 2 !== 0
-    ) {
+    if (times.length % 2 !== 0) {
         throw new Error(
             'Uma jornada precisa possuir uma quantidade par de horários.',
         )
     }
 
     const minutes =
-        times.map(timeToMinutes)
+        times.map(parseTimeToMinutes)
 
     let workedMinutes = 0
 
