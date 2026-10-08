@@ -1,50 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* Definição das classes de animação */
-  --animate-layn-drop: layn-drop 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-layn-slide: layn-slide 700ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
-  --animate-layn-float: layn-float 3.6s ease-in-out 900ms infinite;
   --animate-layn-glow: layn-glow 3.6s ease-in-out infinite;
   --animate-layn-rise: layn-rise 600ms ease-out both;
-  --animate-layn-bar: layn-bar 1.6s ease-in-out infinite;
-
-  /* Keyframes das animações */
-  @keyframes layn-drop {
-    0% {
-      opacity: 0;
-      transform: translateY(-60px);
-    }
-
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes layn-slide {
-    0% {
-      opacity: 0;
-      transform: translateX(60px);
-    }
-
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes layn-float {
-
-    0%,
-    100% {
-      transform: translateY(0) scale(1);
-    }
-
-    50% {
-      transform: translateY(-8px) scale(1.04);
-    }
-  }
+  --animate-layn-fade: layn-fade 500ms ease-out both;
+  --animate-layn-logo: layn-fade 600ms ease-out both, layn-drift 4s ease-in-out 600ms infinite;
+  --animate-layn-draw: layn-draw 1400ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
 
   @keyframes layn-glow {
 
@@ -72,13 +33,35 @@
     }
   }
 
-  @keyframes layn-bar {
+  @keyframes layn-fade {
     0% {
-      transform: translateX(-100%);
+      opacity: 0;
     }
 
     100% {
-      transform: translateX(250%);
+      opacity: 1;
+    }
+  }
+
+  @keyframes layn-drift {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes layn-draw {
+    0% {
+      stroke-dashoffset: 1;
+    }
+
+    100% {
+      stroke-dashoffset: 0;
     }
   }
 }
